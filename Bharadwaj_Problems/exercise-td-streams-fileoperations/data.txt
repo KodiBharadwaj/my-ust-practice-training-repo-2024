@@ -1,0 +1,4 @@
+Test file for counting words
+Each line contains many words
+Distinct Words are counted
+Each line are scanned for extracting words
