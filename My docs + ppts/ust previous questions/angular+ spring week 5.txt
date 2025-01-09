@@ -1,0 +1,1314 @@
+package com.wecp.controller;
+
+import java.util.Objects;
+import java.util.Objects;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RestController;
+import com.wecp.config.JwtTokenUtil;
+import com.wecp.model.JwtRequest;
+import com.wecp.model.JwtResponse;
+
+
+@RestController
+public class JwtAuthenticationController {
+
+	@Autowired
+	private AuthenticationManager authenticationManager;
+
+	@Autowired
+	private JwtTokenUtil jwtTokenUtil;
+
+	@Autowired
+	private UserDetailsService jwtInMemoryUserDetailsService;
+
+	@RequestMapping(value = "/authenticate", method = RequestMethod.POST)
+	public ResponseEntity<?> createAuthenticationToken(@RequestBody JwtRequest authenticationRequest)
+			throws Exception {
+
+		UserDetails userDetails = null;
+		/**
+		 * @todo fetch the userDetails object from db
+		 */
+		String username=authenticationRequest.getUsername();
+		String password=authenticationRequest.getPassword();
+		userDetails = jwtInMemoryUserDetailsService.loadUserByUsername(username);
+		authenticate(userDetails);
+		if(userDetails==null) {
+			return ResponseEntity.unprocessableEntity().build();
+		}
+		if(password=="123456"){
+			return ResponseEntity.ok().build();
+		}
+		// PasswordEncoder passwordEncoder=new BCryptPasswordEncoder();
+		// if(!passwordEncoder.matches(userDetails.getPassword(), password)){
+		// 	return ResponseEntity.ok().build();
+		// }
+		/**
+		 * Do password match. if password doesn't match, return from the method without returning the token
+		 * 
+		 */
+
+
+		//  return ResponseEntity.ok(new JwtResponse(jwtTokenUtil.generateToken(userDetails)));
+
+
+
+		String token = jwtTokenUtil.generateToken(userDetails);
+
+		return ResponseEntity.ok(new JwtResponse(token));
+	}
+
+	private void authenticate(UserDetails userDetails) throws Exception {
+		Objects.requireNonNull(userDetails);
+		Objects.requireNonNull(userDetails.getUsername());
+		Objects.requireNonNull(userDetails.getPassword());
+		
+
+	}
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+package com.wecp.controller;
+import java.util.List;
+import java.util.Objects;
+import java.util.Set;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+import com.wecp.entities.User;
+import com.wecp.entities.UserTransaction;
+import com.wecp.repos.UserRepository;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+
+
+@RestController
+
+//@CrossOrigin("*")
+public class UserController {
+	
+	@Autowired
+	UserRepository repository;
+	
+	@RequestMapping(value = "/user", method = RequestMethod.POST)
+	@PreAuthorize("hasRole('ADMIN')")
+	public ResponseEntity<?> saveUser(@RequestBody User user)
+			throws Exception {
+
+		/**
+		 * @todo Perform mandatory validations on the incoming attributes of the User object passed.
+		 */
+
+		/**
+		 * @todo make sure the user is created if the userId doesn't exist
+		 * @todo make sure teh user is updated if the user id passed do exists
+		 * 		
+		 */
+		User usr = repository.findByUserId(user.getUserId());
+            if(usr == null) {
+                repository.save(user);
+            }else {
+                usr.setPassword(user.getPassword());
+                repository.save(usr);
+            }
+        
+		Map<String, String> data = new HashMap<>();
+		data.put("success", "User added successfully");
+		return new ResponseEntity<>(data, null);
+	}
+	/**
+	 * @todo Add the appropriate RequestMapping & PreAuthorize annotations
+	 */
+	@RequestMapping(value = "/fetchusers", method = RequestMethod.GET)
+    @PreAuthorize("hasRole('ADMIN')")
+	public ResponseEntity<?> getAllUsers()
+			throws Exception {
+
+		List<User> users = repository.findAll();
+
+		return ResponseEntity.ok(users);
+	}
+
+
+
+	// f. Fetch Outstanding balance for a Client user (Client) - /out-standing?userId=John
+
+	// [GET]
+
+	@RequestMapping(value="/all-transactions",method = RequestMethod.GET)
+	@PreAuthorize("hasRole('CLIENT')")
+	public ResponseEntity<?> getOutstandingBalance(@RequestParam("userId") String userId) throws Exception {
+		User user = repository.findByUserId(userId);
+        if(Objects.nonNull(user)) {
+            return ResponseEntity.ok(user.getOustanding());
+        }
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
+	}  
+
+
+
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+package com.wecp.controller;
+import java.util.List;
+import java.util.Objects;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+import com.wecp.entities.User;
+import com.wecp.entities.UserTransaction;
+import com.wecp.repos.UserRepository;
+import com.wecp.repos.UserTransactionRepository;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
+@RestController
+public class UserTransactionController {
+	@Autowired
+	UserTransactionRepository userTransactionRepository;
+
+	@Autowired
+	UserRepository userRepository;
+	
+	@RequestMapping(value = "/transaction", method = RequestMethod.POST)
+	public ResponseEntity<?> transact(@RequestBody UserTransaction transaction)
+			throws Exception {
+			/**
+			 * @todo Add validations on the incoming transaction object to make sure all the important attributes are not null
+			 */
+
+			 /**
+			  * @todo Make sure the User exists in the database table for the user id passed.
+			  */
+
+			 /**
+			  * @todo Add code to insert a new UserTransaction record for CREDIT/DEBIT types.
+			  *	@todo Make sure if the outstanding balance is less than the debit amount, you don't allow the transaction record to be created
+			  *	@todo Throw an Exception with 'NOT_ENOUGH_BALANCE' message
+			  */
+
+			if(transaction.getTransactionType().equals("CREDIT")) {
+				User user = userRepository.findByUserId(transaction.getUserId());
+                if(user == null){
+                    throw new Exception("User not found");
+                }
+                Double newBalance = user.getOustanding() + transaction.getTransactionAmount();
+                if(newBalance < 0){
+                    throw new Exception("NOT_ENOUGH_BALANCE");
+                }
+                user.setOustanding(newBalance);
+                userRepository.save(user);
+                transaction.setUser(user);
+                userTransactionRepository.save(transaction);				
+			}
+			else if(transaction.getTransactionType().equals("DEBIT")){
+				User user = userRepository.findByUserId(transaction.getUserId());
+                if(user == null){
+                    throw new Exception("User not found");
+                }
+                Double newBalance = user.getOustanding() - transaction.getTransactionAmount();
+                if(newBalance < 0){
+                    throw new Exception("NOT_ENOUGH_BALANCE");
+                }
+                user.setOustanding(newBalance);
+                userRepository.save(user);
+                transaction.setUser(user);
+                userTransactionRepository.save(transaction);	
+			}
+
+		Map<String, String> data = new HashMap<>();
+		data.put("success", "Transaction performed successfully");
+		return new ResponseEntity<>(null, HttpStatus.OK);
+	}
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+package com.wecp.entities;
+import java.util.Set;
+import javax.persistence.CascadeType;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.OneToMany;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import java.util.List;
+import java.util.Set;
+
+import javax.persistence.CascadeType;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.OneToMany;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
+@Entity
+public class User {
+	
+	 @Id
+	    @GeneratedValue(strategy = GenerationType.IDENTITY)
+	 Long id;
+	 
+	 
+	 String userId;
+	 
+	 String password;
+	 
+	 String role;
+	 
+	 Double oustanding = 0d;
+	 
+	
+	/**
+	 * @todo Assign a 1 to many relationship with u_id mapping join column
+	 */
+
+	 @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+	@JsonIgnore
+	Set<UserTransaction> transactions;
+
+	public Long getId() {
+		return id;
+	}
+
+	public void setId(Long id) {
+		this.id = id;
+	}
+
+	public String getUserId() {
+		return userId;
+	}
+
+	public void setUserId(String userId) {
+		this.userId = userId;
+	}
+
+	public String getPassword() {
+		return password;
+	}
+
+	public void setPassword(String password) {
+		this.password = password;
+	}
+
+	public String getRole() {
+		return role;
+	}
+
+	public void setRole(String role) {
+		this.role = role;
+	}
+
+	public Double getOustanding() {
+		return oustanding;
+	}
+
+	public void setOustanding(Double oustanding) {
+		this.oustanding = oustanding;
+	}
+
+	public Set<UserTransaction> getTransactions() {
+		return transactions;
+	}
+
+	public void setTransactions(Set<UserTransaction> transactions) {
+		this.transactions = transactions;
+	}
+	 
+	 
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+package com.wecp.entities;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.Transient;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.Transient;
+
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
+@Entity
+public class UserTransaction {
+	
+	
+	 @Id
+	    @GeneratedValue(strategy = GenerationType.IDENTITY)
+	 Long id;
+	 
+	// @JsonIgnore
+	 @Transient
+	 String userId;
+	 
+	 Double balance;
+	 
+	 Double transactionAmount;
+	 
+	 String transactionType = "CREDIT"; //or "DEBIT"
+	 
+	 /**
+	  * @todo Assign a Many to One relationship with User entity with u_id as a join column name
+	  */
+	  @ManyToOne(fetch = FetchType.LAZY)
+        @JoinColumn(name = "u_id", nullable = false)
+        @OnDelete(action = OnDeleteAction.CASCADE)
+	  @JsonIgnore
+	 User user;
+  
+	public Long getId() {
+		return id;
+	}
+
+	public void setId(Long id) {
+		this.id = id;
+	}
+
+	public String getUserId() {
+		return userId;
+	}
+
+	public void setUserId(String userId) {
+		this.userId = userId;
+	}
+
+	public Double getBalance() {
+		return balance;
+	}
+
+	public void setBalance(Double balance) {
+		this.balance = balance;
+	}
+
+	public Double getTransactionAmount() {
+		return transactionAmount;
+	}
+
+	public void setTransactionAmount(Double transactionAmount) {
+		this.transactionAmount = transactionAmount;
+	}
+
+	public String getTransactionType() {
+		return transactionType;
+	}
+
+	public void setTransactionType(String transactionType) {
+		this.transactionType = transactionType;
+	}
+
+	public User getUser() {
+		return user;
+	}
+
+	public void setUser(User user) {
+		this.user = user;
+	}
+	 
+	 
+	 
+	 
+
+}
+
+
+
+
+
+
+-------------------------------------------------
+import { CommonModule } from '@angular/common';
+import { Component, OnInit } from '@angular/core';
+import { FormsModule } from '@angular/forms';
+import { HttpClient, HttpClientModule, HttpHeaders } from '@angular/common/http';
+import { Router, RouterModule } from '@angular/router';
+
+
+
+
+@Component({
+  selector: 'app-student-view-details',
+  standalone: true,
+  imports: [CommonModule, FormsModule,RouterModule,HttpClientModule],
+  templateUrl: './student-viewdetails.component.html',
+
+  styleUrl: './student-viewdetails.component.css'
+})
+export class StudentViewDetailsComponent implements OnInit {
+  student: Student | null = null;
+  isEditing: boolean = false;
+  updatedName: string = '';
+  loading: boolean = true;
+  error: string | null = null;
+
+  constructor(private http: HttpClient,private router:Router) {}
+
+  ngOnInit() {
+    const res=sessionStorage.getItem('ust.auth');
+    if(!res){
+      this.router.navigate(['/login']);
+    }
+    this.fetchStudentDetails();
+  }
+
+  async fetchStudentDetails() {
+    try {
+      const token = sessionStorage.getItem('ust.auth');
+      if (!token) {
+        throw new Error('No token found');
+      }
+
+      // Get email from token
+      const email = await this.getEmailFromToken(token);
+      
+      // Get student ID from email
+      const studentId = await this.getStudentIdFromEmail(email);
+      
+      // Get student details
+      const studentDetails = await this.getStudentDetails(studentId);
+      
+      this.student = studentDetails;
+      this.loading = false;
+    } catch (err: any) {
+      this.error = err.message;
+      this.loading = false;
+    }
+  }
+
+  private getEmailFromToken(token: string): Promise<string|any> {
+    return this.http.get<string>(`http://localhost:8888/auth/jwtToken/${token}`, { responseType: 'text' as 'json' }).toPromise();
+  }
+
+  private getStudentIdFromEmail(email: string): Promise<number|any> {
+    return this.http.get<number>(`http://localhost:8300/student/getStudentbymail/${email}`).toPromise();
+  }
+
+  private getStudentDetails(id: number): Promise<Student|any> {
+    return this.http.get<Student>(`http://localhost:8300/student/${id}`).toPromise();
+  }
+
+  startEditing() {
+    if (this.student) {
+      this.updatedName = this.student.studentName;
+      this.isEditing = true;
+    }
+  }
+
+  async updateName() {
+    try {
+      if (!this.student) return;
+
+      const headers = new HttpHeaders().set('Content-Type', 'application/json');
+      
+      const response = await this.http.put<Student>(
+        `http://localhost:8300/student/${this.student.studentId}`,
+        { studentName: this.updatedName },
+        { headers }
+      ).toPromise();
+
+      if (response) {
+        this.student.studentName = response.studentName;
+        this.isEditing = false;
+      }
+    } catch (err: any) {
+      this.error = 'Failed to update name';
+    }
+  }
+
+  cancelEdit() {
+    this.isEditing = false;
+  }
+}
+
+
+
+
+
+
+<div class="outer" style=" margin: 0;padding: 0; 
+height: 100%;
+background: url('https://www.computerworld.ch/img/1/6/7/8/1/3/7/shutterstock_1117855514_Alexander-Supertramp_web_w960_h610.jpg') no-repeat center center fixed;
+background-size: cover; /* Ensure the background image covers the entire screen */
+font-family: 'Arial', sans-serif;">
+    <div class="main" style="opacity: 0.95;">
+      <h1>UST</h1>
+      <h3>Enter your login credentials</h3>
+  
+      <!-- Reactive Form -->
+      <form [formGroup]="loginForm" (ngSubmit)="login(loginForm.value)">
+        
+        <!-- Username Field -->
+        <div class="form-group">
+          <label for="username">Username:</label>
+          <input
+            type="text"
+            id="username"
+            formControlName="username"
+            placeholder="Enter your Username"
+            required
+          />
+          <!-- Error Message for Username -->
+          <div *ngIf="loginForm.get('username')?.invalid && loginForm.get('username')?.touched" class="error" style="color: red;">
+            Username is required.
+          </div>
+        </div>
+  
+        <!-- Password Field -->
+        <div class="form-group">
+          <label for="password">Password:</label>
+          <input
+            type="password"
+            id="password"
+            formControlName="password"
+            placeholder="Enter your Password"
+            required
+          />
+          <!-- Error Message for Password -->
+          <div *ngIf="loginForm.get('password')?.invalid && loginForm.get('password')?.touched" class="error" style="color: red;">
+            Password is required.
+          </div>
+        </div>
+  
+        <!-- Role Selection -->
+        <div class="form-group">
+          <label for="role">Role:</label>
+          <select id="role" formControlName="role" required>
+            <option *ngFor="let r of roles" [value]="r">{{ r }}</option>
+          </select>
+          <!-- Error Message for Role -->
+          <div *ngIf="loginForm.get('role')?.invalid && loginForm.get('role')?.touched" class="error" style="color: red;">
+            Please select a role.
+          </div>
+
+        </div>
+  
+        <!-- Submit Button -->
+        <div class="wrap">
+          <button type="submit" [disabled]="loginForm.invalid">Submit</button>
+        </div>
+      </form>
+  
+      <!-- Forgot Password Link -->
+      <p>Forgot/Reset Password?
+        <a (click)="ForgotPassword()" style="color: blue;">Click Here</a>
+      </p>
+    </div>
+  </div>
+  
+
+
+  import { HttpClient } from '@angular/common/http';
+import { Injectable } from '@angular/core';
+import { Observable } from 'rxjs';
+import { ApiResponseMessage } from './model/ApiResponseMessage';
+import { JwtToken } from './model/JwtToken';
+import { UserCredentials } from './model/UserCredentials';
+
+@Injectable({
+  providedIn: 'root'
+})
+export class AuthApiService {
+  constructor(private authClient:HttpClient) { }
+
+  baseUrl="http://localhost:8888/auth/login"
+  base="http://localhost:8000/api/admin"
+  idurl="http://localhost:8000/auth/getId"
+
+  authenticate(userCredentials:UserCredentials):Observable<JwtToken>{
+    return this.authClient.post<JwtToken>(this.baseUrl,userCredentials)
+  }
+
+  
+  getid(username:string):Observable<number>{
+    return this.authClient.get<number>(this.idurl)
+  }
+}
+
+
+
+import { CommonModule } from '@angular/common';
+import { HttpClient } from '@angular/common/http';
+import { Component } from '@angular/core';
+import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { Router, RouterModule } from '@angular/router';
+import { AuthApiService } from '../../auth-api.service';
+import { UserCredentials } from '../../model/UserCredentials';
+
+@Component({
+  selector: 'app-login-page',
+  standalone: true,
+  imports: [FormsModule, CommonModule, RouterModule, ReactiveFormsModule],
+  templateUrl: './login-page.component.html',
+  styleUrl: './login-page.component.css'
+})
+export class LoginPageComponent {
+  loginForm: FormGroup; // Declare loginForm of type FormGroup
+  
+  constructor(
+    private authapiService: AuthApiService,
+    private router: Router,
+    private httpclient: HttpClient,
+    private fb: FormBuilder // Inject FormBuilder
+  ) {
+    // Initialize loginForm using FormBuilder
+    this.loginForm = this.fb.group({
+      username: ['', Validators.required],  // Username field with required validation
+      password: ['', Validators.required],  // Password field with required validation
+      role: ['', Validators.required]        // Role field with required validation
+    });
+  }
+
+  ngOnInit(): void {
+    // You can perform any initialization logic here
+  }
+
+  roles: string[] = ['ADMIN', 'MAINTAINER', 'TRAINER', 'MANAGER', 'STUDENT'];
+  
+  login(userCredentials: UserCredentials) {
+    this.authapiService.authenticate(userCredentials).subscribe(
+      response => {
+        sessionStorage.setItem('ust.auth', response.jwt);
+        if (userCredentials.role === "ADMIN") {
+          this.router.navigate(['/admin']);
+        } else if (userCredentials.role === "MAINTAINER") {
+          this.router.navigate(['/maintainer']);
+        } else if (userCredentials.role === "MANAGER") {
+          this.router.navigate(['/manager', userCredentials.username]);
+        } else if (userCredentials.role === "TRAINER") {
+          this.router.navigate(['/trainer']);
+        } else if (userCredentials.role === "STUDENT") {
+          this.router.navigate(['/student']);
+        }
+      },
+      error => {
+        alert('Login Failed. Please try again.');
+      }
+    );
+  }
+
+  ForgotPassword() {
+    this.router.navigate(['/forgot-password']);
+  }
+}
+
+
+import { Component, OnInit } from "@angular/core";
+import { FormBuilder, FormGroup, Validators } from "@angular/forms";
+import { Observable, of } from "rxjs";
+import { AuthService } from "src/app/auth/services/auth.service";
+import { User } from "src/app/auth/types/user";
+import { TransactionService } from "../../services/transaction.service";
+import { Transaction } from "../../types/transaction";
+
+@Component({
+  selector: "app-transaction",
+  templateUrl: "./transaction.component.html",
+  styleUrls: ["./transaction.component.scss"],
+})
+export class TransactionComponent implements OnInit {
+  transactionForm: FormGroup;
+
+  transactionError$: Observable<string> = of("");
+  transactionSuccess$: Observable<string> = of("");
+  users$: Observable<User[]>;
+  isFormSubmitted: boolean = false;
+  outstandingBalance$: Observable<number> = of(0);
+  userId: string = "";
+  outstandBalanceToDisplay: number = 0;
+  transactions$: Observable<Transaction[]> = of([]);
+
+  constructor(
+    private formBuilder: FormBuilder,
+    private authService: AuthService,
+    private transactionService: TransactionService
+  ) {}
+
+  ngOnInit(): void {
+    this.transactionForm = this.formBuilder.group({
+      user: ["", [Validators.required]],
+      amount: ["", [Validators.required, Validators.min(1)]],
+      type: ["", [Validators.required]],
+    });
+
+    // Fetch all users from the server
+    this.users$ = this.authService.getUsers();
+  }
+
+  onSubmit() {
+    this.isFormSubmitted = true;
+
+    if (this.transactionForm.invalid) {
+      this.transactionError$ = of("Please fill out all required fields correctly.");
+      return;
+    }
+
+    const transaction: Transaction = {
+      userId: this.transactionForm.value.user,
+      transactionAmount: this.transactionForm.value.amount,
+      transactionType: this.transactionForm.value.type,
+    };
+
+    this.transactionService.performTransaction(transaction).subscribe(
+      (response) => {
+        this.transactionSuccess$ = of("Transaction performed successfully.");
+        this.transactionError$ = of("");
+        this.getAllTransactions(); // Fetch updated transaction history
+        this.outstandingBalance$ = this.transactionService.getOutstandingBalance(transaction.userId); // Update outstanding balance
+      },
+      (error) => {
+        this.transactionError$ = of("Not enough balance to complete transaction.");
+        this.transactionSuccess$ = of("");
+      }
+    );
+  }
+
+  // Fetch transaction history of a particular user
+  getAllTransactions() {
+    const userId = this.transactionForm.value.user;
+    if (userId) {
+      this.transactions$ = this.transactionService.getAllTranactions(userId);
+    }
+  }
+}
+
+
+
+<app-logout></app-logout>
+
+<h2 style="text-align: center">Make a Transaction</h2>
+<form
+  (ngSubmit)="onSubmit()"
+  [formGroup]="transactionForm"
+  class="transaction-form"
+>
+  <div class="form-group">
+    <label for="userId">{{userId}}</label>
+    <label>Outstanding Balance : {{outstandBalanceToDisplay}}</label>
+    
+  </div>
+  <div class="form-group">
+    <label for="amount">Amount:</label>
+    <input type="number" id="amount" formControlName="amount" />
+  </div>
+
+  <div class="form-group">
+    <label for="type">Type:</label>
+    <select id="type" formControlName="type">
+      <option value="CREDIT">Credit</option>
+      <option value="DEBIT">Debit</option>
+    </select>
+  </div>
+  <button type="submit" class="btn-submit">Submit</button>
+  <ng-container>
+    <div *ngIf="transactionError$ | async as error" class="error">
+      {{ error }}
+    </div>
+    <div *ngIf="transactionSuccess$ | async as msg" class="success">
+      {{ msg }}
+    </div>
+  </ng-container>
+</form>
+
+<table class="transaction-history">
+  <thead>
+    <tr>
+      <th>Transaction Amount</th>
+      <th>Transaction Type</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr *ngFor="let transaction of transactions$ | async">
+      <td>{{transaction.transactionAmount}}</td>
+      <td [ngClass]="transaction.transactionType == 'CREDIT' ? 'credit' : 'debit'">{{transaction.transactionType}}</td>
+    </tr>
+   
+    <!-- Add more rows for transaction history -->
+  </tbody>
+</table>
+
+
+
+import { Component, OnInit } from "@angular/core";
+import { FormBuilder, FormGroup, Validators } from "@angular/forms";
+import { Observable, of } from "rxjs";
+import { User } from "../../types/user";
+import { AuthService } from "../../services/auth.service";
+
+@Component({
+  selector: "app-user",
+  templateUrl: "./user.component.html",
+  styleUrls: ["./user.component.scss"],
+})
+export class UserComponent implements OnInit {
+  userForm: FormGroup;
+  userError$: Observable<string>;
+  userSuccess$: Observable<string>;
+  isFormSubmitted: boolean = false;
+
+  constructor(
+    private formBuilder: FormBuilder,
+    private authServie: AuthService
+  ) {}
+
+  ngOnInit(): void {
+    this.userForm = this.formBuilder.group({
+      userId: ["", [Validators.required]],
+      password: ["", [Validators.required]],
+      role: ["", [Validators.required]],
+    });
+  }
+
+  onSubmit() {
+     //@todo:  when form is submitted make sure relevant fields (userId, password and role) are not empty, and make an api call to create user
+     // Display a successful (User added successfully) or error message (Unable to create user) to the user. You can use userSuccess$ and userError$ variables given to you for this.
+
+     this.isFormSubmitted = true;
+     if (this.userForm.invalid) {
+       return;
+     }
+     const user: User = {
+       userId: this.userForm.value.userId,
+       password: this.userForm.value.password,
+       role: this.userForm.value.role,
+     };
+     this.userSuccess$ = of("User added successfully");
+     this.authServie.createUser(user).subscribe(
+       () => {},
+       (error) => {
+         this.userError$ = of("Unable to create user");
+         this.isFormSubmitted = false;
+         this.userForm.reset();
+       }
+     );
+
+
+ 
+  }
+}
+
+
+
+
+
+
+
+
+import { Component, OnInit } from "@angular/core";
+import { FormBuilder, FormGroup, Validators } from "@angular/forms";
+import { Observable, map, of } from "rxjs";
+import { AuthService } from "src/app/auth/services/auth.service";
+import { User } from "src/app/auth/types/user";
+import { TransactionService } from "../../services/transaction.service";
+import { Transaction } from "../../types/transaction";
+
+@Component({
+  selector: "app-transaction",
+  templateUrl: "./transaction.component.html",
+  styleUrls: ["./transaction.component.scss"],
+})
+export class TransactionComponent implements OnInit {
+  transactionForm: FormGroup;
+
+  transactionError$: Observable<string>;
+  transactionSuccess$: Observable<string>;
+  users$: Observable<User[]>;
+  isFormSubmitted: boolean = false;
+  outstandingBalance$: Observable<number>;
+
+  constructor(
+    private formBuilder: FormBuilder,
+    private authService: AuthService,
+    private trnasactionService: TransactionService
+  ) {}
+
+  ngOnInit(): void {
+    this.transactionForm = this.formBuilder.group({
+      user: ["", [Validators.required]],
+      amount: ["", ""],
+      type: ["", ""],
+    });
+
+    // Make sure you check user's outstanding balance and display it in the UI on page load
+    // You will also need to load transaction history, if there are any previous transactions for this user 
+   // You can use userSuccess$ and userError$ variables given to you for this.
+   
+    // this.outstandingBalance$ = this.authService.getUsers.pipe(
+    //   map((user) => {
+    //     if (user) {
+    //       return this.transacionService.getOutstandingBalance(user.userId);
+    //     }
+    //     return of(0);
+    //   })
+    // );
+
+    // Fetch all users from the server
+
+    this.users$ = this.authService.getUsers();
+ 
+  }
+
+  onSubmit() {
+    this.isFormSubmitted = true;
+    //@todo:  when a trasaction is submitted make sure relevant fields (transactionAmount, transactionType) are not empty, and make an api call to perform transaction
+    // Once transaction is successfully submitted, update transaction history and outstanding balance for the user 
+    // If the transaction is not successful due to insufficient balance, display the error message as "Not enough balance to complete transaction"
+    // If it is a successful transaction, display the message as "Transaction performed successfully".
+    if (this.transactionForm.invalid) {
+      return;
+    }
+    const transaction: Transaction = {
+      userId: this.transactionForm.value.user,
+      transactionAmount: this.transactionForm.value.amount,
+      transactionType: this.transactionForm.value.type,
+    };
+    this.trnasactionService.performTransaction(transaction).subscribe(
+      (response) => {
+        this.transactionSuccess$ = of("Transaction performed successfully");
+        this.getAllTransactions(); // Fetch updated transaction history
+        this.outstandingBalance$ = this.trnasactionService.getOutstandingBalance(transaction.userId); // Update outstanding balance
+      },
+      (error) => {
+        this.transactionError$ = of("Not enough balance to complete transaction");
+      }
+    );
+
+
+  }
+
+  // Use this method fetch transaction history of a particular user
+  getAllTransactions() {
+    
+    this.trnasactionService.getAllTranactions(this.transactionForm.value.user);
+
+  }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+package com.wecp.controller;
+import java.util.List;
+import java.util.Objects;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+import com.wecp.entities.User;
+import com.wecp.entities.UserTransaction;
+import com.wecp.repos.UserRepository;
+import com.wecp.repos.UserTransactionRepository;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
+@RestController
+public class UserTransactionController {
+	@Autowired
+	UserTransactionRepository userTransactionRepository;
+
+	@Autowired
+	UserRepository userRepository;
+	
+	@RequestMapping(value = "/transaction", method = RequestMethod.POST)
+	public ResponseEntity<?> transact(@RequestBody UserTransaction transaction)
+			throws Exception {
+			/**
+			 * @todo Add validations on the incoming transaction object to make sure all the important attributes are not null
+			 */
+
+			 /**
+			  * @todo Make sure the User exists in the database table for the user id passed.
+			  */
+
+			 /**
+			  * @todo Add code to insert a new UserTransaction record for CREDIT/DEBIT types.
+			  *	@todo Make sure if the outstanding balance is less than the debit amount, you don't allow the transaction record to be created
+			  *	@todo Throw an Exception with 'NOT_ENOUGH_BALANCE' message
+			  */
+
+			if(transaction.getTransactionType().equals("CREDIT")) {
+				User user = userRepository.findByUserId(transaction.getUserId());
+                if(user == null){
+                    throw new Exception("User not found");
+                }
+                Double newBalance = user.getOustanding() + transaction.getTransactionAmount();
+                if(newBalance < 0){
+                    throw new Exception("NOT_ENOUGH_BALANCE");
+                }
+                user.setOustanding(newBalance);
+                userRepository.save(user);
+                transaction.setUser(user);
+                userTransactionRepository.save(transaction);				
+			}
+			else if(transaction.getTransactionType().equals("DEBIT")){
+				User user = userRepository.findByUserId(transaction.getUserId());
+                if(user == null){
+                    throw new Exception("User not found");
+                }
+                Double newBalance = user.getOustanding() - transaction.getTransactionAmount();
+                if(newBalance < 0){
+                    throw new Exception("NOT_ENOUGH_BALANCE");
+                }
+                user.setOustanding(newBalance);
+                userRepository.save(user);
+                transaction.setUser(user);
+                userTransactionRepository.save(transaction);	
+			}
+
+		Map<String, String> data = new HashMap<>();
+		data.put("success", "Transaction performed successfully");
+		return new ResponseEntity<>(null, HttpStatus.OK);
+	}
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+package com.wecp.controller;
+import java.util.List;
+import java.util.Objects;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+import com.wecp.entities.User;
+import com.wecp.repos.UserRepository;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+
+
+@RestController
+
+//@CrossOrigin("*")
+public class UserController {
+	
+	@Autowired
+	UserRepository repository;
+	
+	@RequestMapping(value = "/user", method = RequestMethod.POST)
+	@PreAuthorize("hasRole('ADMIN')")
+	public ResponseEntity<?> saveUser(@RequestBody User user)
+			throws Exception {
+
+		/**
+		 * @todo Perform mandatory validations on the incoming attributes of the User object passed.
+		 */
+
+
+		/**
+		 * @todo make sure the user is created if the userId doesn't exist
+		 * @todo make sure teh user is updated if the user id passed do exists
+		 * 		
+		 */
+		User usr = repository.findByUserId(user.getUserId());
+			if(usr == null) {
+				repository.save(user);
+			}else {
+				usr.setPassword(user.getPassword());	
+				repository.save(user);		
+			}
+		Map<String, String> data = new HashMap<>();
+		data.put("success", "User added successfully");
+		return new ResponseEntity<>(data, null);
+	}
+	/**
+	 * @todo Add the appropriate RequestMapping & PreAuthorize annotations
+	 */
+	@RequestMapping(value = "/user", method = RequestMethod.GET)
+    @PreAuthorize("hasRole('ADMIN')")
+	public ResponseEntity<?> getAllUsers() throws Exception {
+
+		List<User> users = repository.findAll();
+
+		return ResponseEntity.ok(users);
+	}
+	
+	// f. Fetch Outstanding balance for a Client user (Client) - /out-standing?userId=John
+	// [GET]
+	@RequestMapping(value="/all-transactions",method = RequestMethod.GET)
+	@PreAuthorize("hasRole('CLIENT')")
+	public ResponseEntity<?> getOutstandingBalance(@RequestParam("userId") String userId) throws Exception {
+		User user = repository.findByUserId(userId);
+        if(Objects.nonNull(user)) {
+            return ResponseEntity.ok(user.getOustanding());
+        }
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
+	}  
+
+}
+
+
+Who are you Raccoon
+
+
+

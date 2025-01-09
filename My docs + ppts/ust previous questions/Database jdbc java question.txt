@@ -1,0 +1,305 @@
+Database.java
+
+package org.example;
+
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+
+public class Database {
+    private final String url;
+    private final String username;
+    private final String password;
+
+    public Database(String url, String username, String password) {
+        this.url = url;
+        this.username = username;
+        this.password = password;
+    }
+
+    public Connection getConnection() throws SQLException {
+        return DriverManager.getConnection(url, username, password);
+    }
+
+    public void add(String username, String email){
+        String sql = "INSERT INTO users (username, email) VALUES (?, ?)";
+
+        try (Connection connection = getConnection();
+            PreparedStatement preparedStatement = connection.prepareStatement(sql)){
+
+                preparedStatement.setString(1,username);
+                preparedStatement.setString(2,email);
+
+                int rowsAffected = preparedStatement.executeUpdate();
+                if(rowsAffected > 0){
+                    System.out.println("User added successfully.");
+                }
+                else {
+                    System.out.println("User could not be added.");
+                }
+            } catch (SQLException e){
+                System.out.println("Error while adding user to the database: " + e.getMessage());
+            }
+    }
+
+}
+
+
+-----------------------------------------------------------------------------------------------------------
+
+
+RefactoringChallenge.java 
+
+package org.example;
+
+import java.sql.Connection;
+
+public class RefactoringChallenge {
+    public static void main(String[] args) {
+        // Create a Database instance
+        Database database = new Database("jdbc:mysql://localhost:3306/refactoring_challenge", "root", "hellowecp");
+
+        // call the method to create a user and send a notification to the user through UserManagement
+
+    }
+}
+
+
+
+-----------------------------------------------------------------------------------------------------------
+
+
+userDataManager.java
+
+package org.example;
+
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+
+public class UserDataManager {
+
+    private Database database;
+
+    public UserDataManager(Database database){
+        this.database = database;
+    }
+
+    public void addUser(String username, String email){
+        database.add(username, email);
+    }
+
+}
+
+
+------------------------------------------------------------------------------------------------------
+
+
+    UserManagement.java
+
+    package org.example;
+
+public class UserManagement {
+    private Database database;
+    public UserManagement (Database database) {
+        this.database = database;
+    }
+
+    private UserDataManager userDataManager;
+    private UserNotifier userNotifier;
+
+    public UserManagement(UserDataManager userDataManager, UserNotifier userNotifier){
+        this.userDataManager = userDataManager;
+        this.userNotifier = userNotifier;
+    }
+
+    public void registerUser(String username, String email) {
+        // Add user to the database
+        // database.add(username, email);
+        // Send notification email to user
+        // sendEmail(email, "Welcome to the system, + username + !");
+
+        userDataManager.addUser(username, email);
+        sendEmail(email, "Welcome to the system,"+username+"!");
+    }
+
+    private void sendEmail(String email, String message) {
+        System.out.println("Sending email to " + email);
+        System.out.println("Message: " + message);
+        // Email sending logic
+    }
+}
+
+
+
+------------------------------------------------------------------------------------------------
+
+
+userNotifier.java
+package org.example;
+
+public class UserNotifier {
+
+    public void sendEmail(String email, String message){
+        System.out.println("Sending email to " + email);
+        System.out.println("Message: " + message);
+    }
+}
+
+
+
+-------------------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------------------
+-----------------------------------------------------------------------------------------------------
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Real Estate Listing Form</title>
+    <style>
+      form {
+        display: flex;
+        flex-direction: column;
+        width: 50%;
+        justify-content: center;
+        align-items: center;
+        border: 1px solid #fff;
+        margin: 0 auto;
+
+        padding: 10px;
+      }
+
+      div {
+        width: 100%;
+        display: flex;
+        justify-content: center;
+        margin: 1rem;
+      }
+
+      label {
+        width: 20%;
+      }
+
+      input[type="text"],
+      input[type="number"],
+      textarea {
+        width: 80%;
+      }
+
+      .summary,
+      .error {
+        color: white;
+      }
+
+      .error {
+        background-color: red;
+      }
+    </style>
+  </head>
+  <body>
+    <form>
+      <h2 style="color: white">Real Estate Listing Form</h2>
+      <div>
+        <label for="Name">Property Name</label>
+        <!-- Property Name text input -->
+        <input type="text" name="Name" id="Name">
+      </div>
+
+      <div>
+        <label for="Location">Location</label>
+        <!-- Location text input -->
+        <input type="text" name="Location" id="Location">
+      </div>
+      <div>
+        <label for="Price">Price</label>
+        <!-- Price Number input -->
+        <input type="number" name="Price" id="Price">
+      </div>
+      <div>
+        <label for="Description">Description</label>
+        <!-- Description textarea -->
+        <textarea name="Description" id="Description"></textarea>
+      </div>
+      <div>
+        <button id="add-btn">Add Property</button>
+      </div>
+
+      <!-- Use this div to display summary-->
+      <div id="summary"></div>
+
+      <!-- Use this div to display error messages -->
+      <div id="error"></div>
+    </form>
+
+    <script type="text/javascript">
+      const btn = document.getElementById("add-btn");
+
+      // Add click event listener to btn and attach addProperty fnction
+      btn.addEventListener("click",addProperty)
+
+      function addProperty(e) {
+        e.preventDefault();
+        let error = "";
+        let summary = "";
+        // Check whether "Name", "Location", "Price", "Description" contains values or not
+        // If they do not contain values, display an error message. Use div with id=error to display the error message
+        // A typical error message if all the values are not present would look like following:
+        // "Name is empty \n" +
+        // "Location is empty \n" +
+        // "Price is empty \n" +
+        // "Description is empty \n"
+        // \n is used to denote a new line
+        const name=document.getElementById("Name").value;
+        const location=document.getElementById("Location").value;
+        const price=document.getElementById("Price").value;
+        const description=document.getElementById("Description").value;
+        if(name){
+          summary=summary+"Name : "+name+" \n"
+          
+        }
+        else{
+          error=error+"Name is empty \n";
+        }
+        if(location){
+          summary=summary+"Location : "+location+" \n"
+        }
+        else{
+          error=error+"Location is empty \n";
+        }
+        if(price){
+          summary=summary+"Price : "+price+" \n"
+        }
+        else{
+          error=error+"Price is empty \n";
+        }
+        if(description){
+          summary=summary+"Description : "+description+" \n"
+        }
+        else{
+          error=error+"Description is empty \n";
+        }
+
+        // If all the inputs are filled display a summary of entered information
+        // Use div with id=summary to display summary information
+        // A typical summary would look like following
+        //"Name : Test Name \n" +
+        //"Location : Test Location \n" +
+        //"Price : 120 \n" +
+        //"Description : Test Description \n"
+        // \n is used to denote a new line
+
+        if (error) {
+          const errorElement = document.getElementById("error");
+          errorElement.innerHTML = error;
+          errorElement.classList.add("error");
+        }
+
+        if (summary) {
+          const summaryElement = document.getElementById("summary");
+          summaryElement.innerHTML = summary;
+          summaryElement.classList.add("summary");
+        }
+      }
+    </script>
+  </body>
+</html>

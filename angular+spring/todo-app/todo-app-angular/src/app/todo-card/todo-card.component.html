@@ -1,0 +1,15 @@
+
+    <div class="card-body">
+      <h5 *ngIf="todo" class="card-title">{{todo.title|shorten|titlecase}}</h5>
+      <h6 class="card-subtitle mb-2 text-body-secondary">{{todo?.status|titlecase}}</h6>
+      <!-- <a href="#" (click)="toggleUpdate()" class="btn btn-dark">Update</a> -->
+      <a routerLink="{{todo?.id}}" class="btn btn-dark">View Details</a>
+      
+      <button class="btn btn-danger">Delete</button>
+    </div>
+    
+    <div *ngIf="isUpadting" class="card">
+      <div class="card-body">
+       <app-update-todo [todo]="todo"></app-update-todo>
+      </div>
+

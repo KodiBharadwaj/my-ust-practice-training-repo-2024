@@ -1,0 +1,23 @@
+<body>
+    <div class="container">
+        <h2>Signup Form</h2>
+        <form (submit)="signupFunction(signupDetails.value)" #signupDetails="ngForm">
+            <div class="form-group">
+                <label for="username">Username</label>
+                <input ngModel type="text" id="username" name="username" required>
+            </div>
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input ngModel type="password" id="password" name="password" required>
+            </div>
+            <div>
+                <label for="role" class="form-group"> Role </label>
+                <input ngModel type="text" id = "role" name="role" required>
+            </div>
+            <br>
+            
+            <button type="submit">Signup</button>
+        </form>
+        <p id="message"></p>
+    </div>
+</body>

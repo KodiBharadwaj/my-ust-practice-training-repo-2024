@@ -1,0 +1,244 @@
+package com.wecp.controller;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.wecp.dto.PersonSalesDto;
+import com.wecp.entities.PersonTransaction;
+import com.wecp.entities.User;
+import com.wecp.repos.PersonTxnRepository;
+import com.wecp.services.PersonTxnService;
+@RestController
+public class PersonTxnController {
+	@Autowired
+	PersonTxnService personTxnService;
+	
+	@Autowired
+	PersonTxnRepository personTxnRepository;
+	
+	@RequestMapping(value = "/addOrUpdate", method = RequestMethod.POST)
+	public ResponseEntity<?> addOrUpdate(@RequestBody PersonTransaction personTransaction)
+			throws Exception {
+
+		personTxnService.saveOrUpdate(personTransaction);
+		return ResponseEntity.ok("success");
+	}
+	
+	/*@todo: map a post endpoint to /delete */
+	
+	@DeleteMapping("/delete")
+	public ResponseEntity<?> delete(@RequestParam("id") Long id){
+		/**
+		 * @todo Perform mandatory validations on the incoming id attribute. Check if it is valid as in the record exists in database with that id.
+		 * If the id doesn't exist in database, return 'INVALID_ID_PASSED' as a String response
+		 */
+
+		 PersonTransaction user = personTxnRepository.findById(id).orElse(null);
+		 if(user == null){
+			ResponseEntity.ok("INVALID_ID_PASSED");
+		 }
+
+		personTxnService.delete(id);
+		return ResponseEntity.ok("success");
+	}
+	
+	//@todo: map a get endpoint to /fetchAllPersonTransactions 
+	
+	@GetMapping("/fetchAllPersonTransactions")
+	public ResponseEntity<?> fetchAllPersonTransactions()
+			throws Exception {
+
+		
+		/**
+		 * @todo Fetch all the PersonTransaction records and return them in ResponseEntity
+		 */
+
+		 return ResponseEntity.ok(personTxnService.fetchAll());
+		// return null;
+	}
+	
+	// @todo: map a get endpoint to /calculateTotalSales 
+	
+	@GetMapping("/calculateTotalSales")
+	public ResponseEntity<?> calculateTotalSales()
+			throws Exception {
+		
+		/**
+		 * @todo Call the appropriate method on personTxnService to populate the amt variable
+		 */
+		// Double amt = null;
+		return ResponseEntity.ok(personTxnService.calculateTotalSales());
+		
+	}
+	
+// @todo: map a get endpoint to /calculateTotalCreditCardSales
+	
+
+	@GetMapping("/calculateTotalCreditCardSales")
+	public ResponseEntity<?> calculateTotalCreditCardSales()
+			throws Exception {
+
+	
+				return ResponseEntity.ok(personTxnService.calculateTotalCreditCardSales());
+	
+	}
+	
+// @todo: map a get endpoint to /calculateTotalCashSales
+	
+	@GetMapping("/calculateTotalCashSales")
+	public ResponseEntity<?> calculateTotalCashSales()
+			throws Exception {
+
+		return ResponseEntity.ok(personTxnService.calculateTotalCashSales());
+	}
+	// @todo: map a get endpoint to /fetchPersonWithMostSales
+	
+	@GetMapping("/fetchPersonWithMostSales")
+	public ResponseEntity<?> fetchPersonWithMostSales()
+			throws Exception {
+
+				return ResponseEntity.ok(personTxnService.fetchPersonWithMostSales());
+	
+	}
+
+}
+
+
+
+
+
+
+
+
+
+
+--------------------------------------------------------------
+
+
+import { Component } from "@angular/core";
+import { Observable, catchError, switchMap, throwError } from "rxjs";
+import { ReportsService } from "./reports.service";
+import { Sales } from "./sales.interface";
+// Import Sales interface
+
+@Component({
+  selector: "app-root",
+  templateUrl: "./app.component.html",
+  styleUrls: ["./app.component.css"],
+})
+export class AppComponent {
+  title = "reports-dashboard";
+
+  salesData$:Observable<Sales[]>; //This should be an observable of Sales data
+
+  totalSales$:Observable<number>; //This should be an observable of number
+  totalCashSale$:Observable<number>; //This should be an observable of number
+  totalCreditSale$:Observable<number> //This should be an observable of number
+  mostSalesBuyer$: Observable<{ personName: string; totalSales: number }>;
+
+  transactions$: Observable<Sales[]>; // This will hold all transaction data
+
+  // Use this to store input values in the form
+  transaction: Sales = {
+    personName: '',
+    transactionAmount: 0,
+    transactionType: 'CASH',
+  }
+
+  transactionTypes = [
+    {
+      key: "CREDIT_CARD",
+      value: "Credit",
+    },
+    {
+      key: "CASH",
+      value: "Cash",
+    },
+  ];
+
+  // You will need to inject relevant services
+  constructor(private resportsService:ReportsService) {}
+
+  ngOnInit() {
+    // Make sure to populate dashboard reports with data on the page load
+    this.fetchData();
+  }
+
+  handleSubmit(){
+    // When a new transaction is submitted, call addTransaction method in reports.service with transaction data
+    // Make sure to update dashboard reports and transaction list when a new transaction is added
+    // User must be able to view latest data without refreshing the page/ browser
+    this.resportsService.addTransaction(this.transaction);
+    this.fetchData();
+  
+  };
+
+  fetchData() {
+    // Call getSalesData, calculateTotalSales, calculateTotalCashSale, calculateTotalCreditSale, calculateBuyerWithMostSale
+    // All these methods are defined in reportsService
+    // Make sure you assign the values to observables defined above
+    this.salesData$ = this.resportsService.getSalesData();
+    this.totalSales$ = this.resportsService.calculateTotalSales();
+    this.totalCashSale$ = this.resportsService.calculateTotalCashSale();
+    this.totalCreditSale$ = this.resportsService.calculateTotalCreditSale();
+    this.mostSalesBuyer$ = this.resportsService.calculateBuyerWithMostSale();
+  }
+}
+
+
+
+
+
+------------------------------------------------------
+
+import { HttpClient } from "@angular/common/http";
+import { Injectable } from "@angular/core";
+import {  Observable} from "rxjs";
+import { Sales } from "./sales.interface";
+import { environment } from "./../environments/environment";
+
+@Injectable({
+  providedIn: "root",
+})
+export class ReportsService {
+  private baseURL = environment.baseURL;
+
+  constructor(private http: HttpClient) {}
+
+  getSalesData(): Observable<Sales[]> {
+    // GET call to fetchAllPersonTransactions
+    return this.http.get<Sales[]>(`${this.baseURL}/fetchAllPersonTransactions`);
+  }
+
+  calculateTotalSales(): Observable<number> {
+    // GET call to calculateTotalSales
+    return this.http.get<number>(`${this.baseURL}/calculateTotalSales`);
+  }
+
+  calculateTotalCashSale(): Observable<number> {
+    // GET call to calculateTotalCashSales
+    return this.http.get<number>(`${this.baseURL}/calculateTotalCashSales`);
+  }
+
+  calculateTotalCreditSale(): Observable<number> {
+    // GET call to calculateTotalCreditCardSales
+    return this.http.get<number>(`${this.baseURL}/calculateTotalCreditCardSales`);
+  }
+
+  calculateBuyerWithMostSale(): Observable<{personName: string; totalSales: number;}> {
+    // GET call to fetchPersonWithMostSales
+    return this.http.get<{personName: string; totalSales: number;}>(`${this.baseURL}/fetchPersonWithMostSales`);
+  }
+
+  addTransaction(sale: Sales): Observable<Sales> {
+    // POST request to addOrUpdate endpoint. Make sure to pass sale data to create a new record in the dastabase
+    return this.http.post<Sales>(`${this.baseURL}/addOrUpdate`, sale);
+  }
+}
