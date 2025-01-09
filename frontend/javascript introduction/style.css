@@ -1,0 +1,31 @@
+.border-form{
+    border: 2px solid #000;
+    padding : 30px;
+    width: 180px;          
+    border-radius: 10px;         
+    box-shadow: 5px 5px 15px rgba(0, 0, 0, 0.2);
+}
+.buttonMake{
+    flex: 3;
+    border: none;
+    background-color: red;
+    color: white;
+    padding : 10px;
+    border-radius: 5%;
+    width : 110px;
+}
+.buttonMake:hover{
+    cursor: pointer;
+}
+
+.resetMake{
+    flex: 1;
+    border: none;
+    background-color: grey;
+    color: white;
+    padding : 10px;
+    border-radius: 10%;
+}
+.resetMake:hover{
+    cursor: pointer;
+}

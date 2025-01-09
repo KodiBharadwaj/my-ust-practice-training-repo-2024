@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <title>UST Global</title>
+    <style>
+        .ust{
+            color: blue;
+            font-size: 20px;
+        }
+        a{
+            text-decoration: none;
+        }
+        p{
+            text-align: justify;
+        }
+        .boxClass{
+            border: 1px solid black;
+            padding: 10px;
+            margin : 10px;
+            width : 270px;
+            background-color: rgb(200, 235, 195);
+            border-radius: 6%;
+        }
+        .boxClass1{
+            border: 1px solid black;
+            padding: 10px;
+           
+            margin : 10px;
+            width : 270px;
+            background-color: rgb(200, 235, 195);
+            border-radius: 6%;
+        }
+        .flexibox{
+            display: flex;
+            justify-content: center; /* align horizontally */
+            align-items: center; /* align vertically */
+            justify-content: space-evenly;
+            margin : 40px;
+        }
+        .bckgroundColorForFieldset{
+            background-color: #E0FFFF;
+        }
+        .gallery{
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); /* Responsive 3x2 grid */
+            gap: 40px;  /* Space between images */
+            max-width: 800px;  /* Limits the maximum width of the gallery */
+            margin: 0 auto;  /* Centers the gallery horizontally */
+            padding: 20px;  /* Adds padding around the gallery */
+        }
+        .gallery img {
+            width: 100%;  /* Images take up the full width of the grid cell */
+            height: 100%; /* Maintain aspect ratio */
+            border-radius: 10px; /* Optional: rounded corners */
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);  /* Optional: subtle shadow */
+            transition: transform 0.3s ease;  /* Smooth zoom effect on hover */
+        }
+
+        .gallery img:hover {
+            transform: scale(1.05);  /* Zoom in on hover */
+        }
+        </style>
+</head>
+<body>
+    <h1>Wecome to UST Global</h1>
+    <h2>Trivandrm, Kerala</h2>
+    <h6>Fewer Clients More Attention</h6>
+
+    <hr/>
+   
+    <p><span class="ust"><a href="https://www.ust.com/" target="_blank">UST Global</a></span> is a leading digital technology services company that provides powerful solutions for Global 1000 companies. UST Global's mission is to lead companies through critical digital transformations to drive higher business value. UST Global specializes in six next generation digital services – design, cyber security, mobile, social, analytics and cloud. Powered by the mantra 'fewer clients, more attention', UST Global strives for excellence in providing their clients high quality services and a commitment to long-term success. Headquartered in Aliso Viejo, California, UST Global has over 20,000 associates; operating in 25 countries across four continents.</p>
+    
+   <p> <span class="ust"><a href="https://www.ust.com/">UST Global</a></span> believes in building long-lasting, strategic business relationships through agile and client-centric global engagement models that combines local experts & resources with cost, scale, and quality advantages of global operations.</p>
+    
+   <p> <span class="ust"><a href="https://www.ust.com/">UST Global</a></span> is a technology partner dedicated to transforming businesses, communities, and the people who live within them. Operating in 25 countries, UST Global leads the way in powering the world with technology and software solutions. UST Global believes in building long-lasting, strategic business relationships through agile and client-centric global engagement models that combines local experts & resources with cost, scale, and quality advantages of global operations.</p>
+
+
+   <fieldset class = "bckgroundColorForFieldset">
+       <legend> @ust </legend>
+       <div class = flexibox>
+        <div class = boxClass>
+            <h3>Our Services</h3>
+            <ul>
+                 <li>Design</li>
+                 <li>Cyber Security</li>
+                 <li>Mobile</li>
+                 <li>Social</li>
+                 <li>Analytics</li>
+                 <li>Cloud</li>
+            </ul>
+      </div>
+       <div class = boxClass1>
+               <h3>Our Clients</h3>
+               <ol>
+                     <li>Global 1000 companies</li>
+                     <li>Fortune 500 companies</li>
+                     <li>Leading technology companies</li>
+                     <li>Government organizations</li>
+                     <li>Healthcare organizations</li>
+                     <li>Financial services organizations</li>
+               </ol>
+       </div>
+       </div>
+   </fieldset>
+
+
+
+<br>
+<br>
+<br>
+<br>
+<br>
+
+    <div>
+            <h3 align = center>Our Locations</h3>
+            <table border="1px", cellspacing = 0, cellpadding = 20px, width = 700px, align = center>
+                <thead>
+                <tr>
+                    <th rowspan="2">Building Name</th>
+                    <th colspan="2">Location</th>
+                </tr>
+                <tr>
+                <th>City</th>
+                    <th>State</th>
+                </tr>   
+                </thead>
+                <tbody>
+                <tr>
+                    <td>UST Global</td>
+                    <td>Aliso Viejo</td>
+                    <td>California</td>
+                </tr>
+                <tr>
+                    <td>UST Global</td>
+                    <td>Trivandrum</td>
+                    <td>Kerala</td>
+                </tr>
+                <tr>
+                    <td>UST Global</td>
+                    <td>Chennai</td>
+                    <td>Tamil Nadu</td> 
+                </tr>
+                </tbody>
+            </table>
+        
+    </div>
+<br>
+<br>
+<br>
+    <h3 align = center>Some beautiful Images of UST Campus</h3>
+
+    <div class="gallery">
+        <img src="ust1.jpg" alt="Image 1">
+        <img src="ust2.jpg" alt="Image 2">
+        <img src="ust3.jpg" alt="Image 3">
+        <img src="ust4.png" alt="Image 4">
+        <img src="ust5.png" alt="Image 5">
+        <img src="ust6.png" alt="Image 6">
+    </div>
+
+</body>
+</html>

@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Employee Form</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="script.js"></script>
+    <script>
+        let readInput = async function(event) {
+            event.preventDefault();
+
+            if (confirm("Are you sure you want to submit?")) {
+                let id = document.getElementById('id').value;
+                let name = document.getElementById('name').value;
+                let location = document.getElementById('location').value;
+                let joinDate = document.getElementById('joinDate').value;
+                let githubUser = document.getElementById('githubUser').value;
+
+                // Insert row into the table
+                let table = document.getElementById('tableInfo').getElementsByTagName('tbody')[0];
+                let row = table.insertRow();
+
+                let col1 = row.insertCell(0);
+                let col2 = row.insertCell(1);
+                let col3 = row.insertCell(2);
+                let col4 = row.insertCell(3);
+                let col5 = row.insertCell(4);
+                let col6 = row.insertCell(5);
+
+                col1.textContent = id;
+                col2.textContent = name;
+                col3.textContent = location;
+                col4.textContent = joinDate;
+
+                // Fetch the GitHub details and add them to the table
+                try {
+                    const user = await fetchGithubUser(githubUser);
+
+                    // Create an img element for the GitHub avatar
+                    let avatarImg = document.createElement('img');
+                    avatarImg.src = user.avatar_url;
+                    avatarImg.alt = "GitHub Avatar";
+                    avatarImg.style.width = "50px";  // Adjust the size as needed
+                    avatarImg.style.height = "50px";
+                    avatarImg.style.borderRadius = "10%";
+
+                    col5.appendChild(avatarImg);
+                } catch (error) {
+                    col5.textContent = "Error fetching GitHub details";
+                }
+
+                // Create and append delete button
+                let deleteButton = document.createElement('button');
+                deleteButton.textContent = 'Delete';
+                deleteButton.className = 'deleteButton'; // Add a class for styling, if needed
+
+                // Add event listener for the delete button
+                deleteButton.onclick = function() {
+                    let rowToDelete = this.parentElement.parentElement;
+                    rowToDelete.remove(); // Remove the respective row
+                };
+
+                col6.appendChild(deleteButton);
+
+                // Clear the form after submission
+                document.getElementById('id').value = '';
+                document.getElementById('name').value = '';
+                document.getElementById('location').value = '';
+                document.getElementById('joinDate').value = '';
+                document.getElementById('githubUser').value = '';
+            }
+        };
+    </script>
+</head>
+<body>
+    <div align="center">
+        <h3>Employee Details Form</h3>
+
+        <form onsubmit="readInput(event)" class="border-form">
+            <label for="id">ID:</label><br>
+            <input type="text" id="id" name="id" required placeholder="Enter your ID here"><br><br>
+
+            <label for="name">Name:</label><br>
+            <input type="text" id="name" name="name" placeholder="Enter your Name here" required><br><br>
+
+            <label for="location">Location:</label><br>
+            <input type="text" id="location" name="location" placeholder="Enter your Location here" required><br><br>
+
+            <label for="joinDate">Join Date:</label><br>
+            <input type="date" id="joinDate" name="joinDate" required><br><br>
+
+            <label for="githubUser">Github User:</label><br>
+            <input type="text" id="githubUser" name="githubUser" placeholder="Enter your GitHub username" required><br><br>
+
+            <div class="buttonClass">
+                <button type="submit" class="buttonMake">Submit</button>
+                <button type="reset" class="resetMake">Reset</button>
+            </div>
+        </form>
+
+        <h2>Details of the Employee</h2>
+        <table id="tableInfo" border="1" cellspacing="0" cellpadding="10px">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Name</th>
+                    <th>Location</th>
+                    <th>Join Date</th>
+                    <th>GitHub Picture</th>
+                    <th> Delete </th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+</body>
+</html>

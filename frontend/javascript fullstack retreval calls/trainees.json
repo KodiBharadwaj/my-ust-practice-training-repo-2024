@@ -1,0 +1,41 @@
+{
+  "trainees": [
+    {
+      "id": "2",
+      "name": "Lokesh",
+      "location": "Visakhapatnam",
+      "joinedDate": "2024-08-20"
+    },
+    {
+      "id": "4",
+      "name": "Hemanth",
+      "location": "Bengaluru",
+      "joinedDate": "2024-09-01"
+    },
+    {
+      "id": "5",
+      "name": "Charan",
+      "location": "Chennai",
+      "joinedDate": "2024-09-05"
+    },
+    {
+      "id": "6",
+      "name": "Ramanuj",
+      "location": "Mumbai",
+      "joinedDate": "2024-09-10"
+    },
+    {
+      "id1": "1",
+      "name": "Kodi Bharadwaj",
+      "location": "Srikakulam",
+      "joinedDate": "2024-08-14",
+      "id": "1"
+    },
+    {
+      "id": "3",
+      "name": "Chekuri Santhosh",
+      "location": "Rajahmundry",
+      "joinedDate": "2024-08-14"
+    }
+  ]
+}

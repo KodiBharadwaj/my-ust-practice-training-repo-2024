@@ -1,0 +1,25 @@
+<div class = "col-12">
+    <div class = "form-group">
+
+            <label for="id"> ID </label>
+            <input type = "number" class = "form-control" name = "id" id = "id"  #pid>
+        
+            <label for = "name">Product Name </label>
+            <input type = "text" class = "form-control" name = "name" id = "name"  #pname>
+        
+            <label for = "price">Price</label>
+            <input type = "text" class = "form-control" name = "price" id = "price"  #pprice>
+        
+            <button class = "btn btn-primary" (click) = "addProduct(pid.value, pname.value, pprice.value)">Add Product</button>
+
+    </div>
+</div>
+
+<div class="col-12">
+    <app-view-product-list [productList]="productList"></app-view-product-list>
+</div>
+
+<div class="col-12">
+    <h3> Total revenue is: </h3>
+    <p> {{totalRevenue()}} </p>
+</div>

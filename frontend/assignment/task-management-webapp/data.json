@@ -1,0 +1,25 @@
+{
+  "tasks": [
+    {
+      "id": "1",
+      "name": "Complete Assignment",
+      "description": "Finish the HTML, CSS, Bootstrap, and JS task",
+      "dueDate": "2024-09-28",
+      "completed": false
+    },
+    {
+      "id": "2",
+      "name": "Play Cricket",
+      "description": "Reach the turf on time tonight to play cricket",
+      "dueDate": "2024-09-28",
+      "completed": false
+    },
+    {
+      "id": "3",
+      "name": "Cricket",
+      "description": "Play cricket here",
+      "dueDate": "2024-09-24",
+      "completed": false
+    }
+  ]
+}

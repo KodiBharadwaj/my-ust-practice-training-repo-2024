@@ -1,0 +1,18 @@
+<!-- <div class="card" style="width: 18rem;">
+    <div class="card-body">
+      <h5 class="card-title">{{todo?.title}}</h5>
+      <h6 class="card-subtitle mb-2 text-muted">{{todo?.status}}</h6>
+      <a href="#" class="btn btn-dark">Explore More</a>
+      <button (click)="deleteTodos(todo?.title)" class="btn btn-danger">Delete</button>
+    </div>
+</div> -->
+
+<div class="card" [ngClass]="{'bg-warning': todo?.status === 'Pending', 'bg-success': todo?.status === 'Completed'}" style="width: 18rem;">
+  <div class="card-body">
+    <h5 class="card-title">{{todo?.title}}</h5>
+    <h6 class="card-subtitle mb-2 text-muted me">{{todo?.status}}</h6>
+    <a href="#" class="btn btn-dark me-2">Explore More</a>
+    <button (click)="deleteTodo(todo?.title)" class="btn btn-danger">Delete</button>
+  </div>
+</div>
+<br>

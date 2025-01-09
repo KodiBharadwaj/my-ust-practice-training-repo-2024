@@ -1,0 +1,41 @@
+<div class="card shadow p-3 mb-4 bg-light">
+    <h5 class="card-title text-center">Add Todos</h5>
+    <div class="card-body">
+        <p>Add your todos here!</p>
+    </div>
+    <form (submit)="addTodos(todoForm.value)" #todoForm = "ngForm">
+        <div class="form-group">
+            <label for="title" class="form-label">Title</label>
+            <input type="text" name="title" id="title" class="form-control"
+                ngModel pattern="[a-zA-Z0-9 ]{3,}" required="" #titleText="ngModel"
+                [class.is-invalid]="titleText.touched && titleText.invalid"
+                [class.is-valid]="titleText.touched && titleText.valid"
+                >
+                <p *ngIf="titleText.touched && titleText.invalid"> 
+                    <small *ngIf="titleText.errors?.['required']" class="text-danger">Title is required</small>
+                    <small *ngIf="titleText.errors?.['pattern']" class="text-danger">Invalid Format</small>
+                </p>
+        </div>
+    
+        <div class="form-group">
+            <label for="status" class="form-label">Status</label>
+            <!-- <input type="text" name="status" id="status" class="form-control"
+                ngModel required="" #statusText="ngModel">
+                <small *ngIf="statusText.touched && statusText.invalid"  class="text-danger">Status is required</small>
+            > -->
+            <select name="status" id="status" class="form-select" ngModel>
+                <option value=""></option>
+                <option value="Completed">Completed</option>
+                <option value="Pending">Pending</option>
+            </select> <br>
+        </div>
+    
+        <div class="form-group">
+            <button [disabled]="todoForm.invalid" type="submit" class="btn btn-primary me-2">Save Todo</button>
+            <button type = "reset" class="btn btn-dark">Reset</button>
+            <!-- <button type = "bhtton" (click)="printTodos()" class="btn btn-success">Print All Todos</button> -->
+        </div>
+    </form>
+    
+</div>
+

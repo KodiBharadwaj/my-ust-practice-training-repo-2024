@@ -1,0 +1,17 @@
+{
+  "name": "junit-testing",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "jest"
+  },
+  "author": "Kodi Bharadwaj",
+  "license": "ISC",
+  "description": "",
+  "devDependencies": {
+    "@types/jest": "^29.5.13"
+  },
+  "dependencies": {
+    "jest": "^29.7.0"
+  }
+}

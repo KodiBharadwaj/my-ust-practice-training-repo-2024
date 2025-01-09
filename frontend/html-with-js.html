@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script>
+        let readInput = function(){
+            let username = document.getElementById('username').value;
+            // document.getElementById('ud').innerHTML=`Hello ${username}`
+            document.getElementById('ud').textContent = username;
+        }
+    </script>
+</head>
+<body>
+    <input type = "text" name = "username" id = "username" placeholder="Input your name">
+    <button onclick = "readInput()"> Enter </button>
+    <p id = "ud"> </p>
+
+    
+</body>
+</html>

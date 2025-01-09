@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Button Styling</title>
+    <style>
+        /* Full height for the body */
+        body {
+            height: 100vh; /* Make body take full height of the viewport */
+            display: flex; /* Use flexbox for centering */
+            justify-content: center; /* Center horizontally */
+            align-items: center; /* Center vertically */
+            margin: 0; /* Remove default margin */
+        }
+
+        /* Basic button styles */
+        .btn {
+            padding: 10px 20px; /* Adds padding inside the button */
+            background-color: #007BFF; /* Background color (blue) */
+            color: white; /* Text color */
+            border: none; /* Removes default border */
+            border-radius: 5px; /* Rounds the button's corners */
+            font-size: 16px; /* Text size */
+            cursor: pointer; /* Changes cursor to pointer on hover */
+            transition: background-color 0.3s, box-shadow 0.3s; /* Smooth transition for hover effects */
+        }
+
+        /* Hover effect */
+        .btn:hover {
+            background-color: #0056b3; /* Darker blue when hovered */
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Adds shadow when hovered */
+        }
+
+        /* Button focus (when clicked or focused using the keyboard) */
+        .btn:focus {
+            outline: none; /* Removes the default outline */
+            box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.5); /* Adds a blue ring around the button */
+        }
+
+        /* Disabled button state */
+        .btn:disabled {
+            background-color: #cccccc; /* Grey background for disabled state */
+            cursor: not-allowed; /* Shows that the button is not clickable */
+        }
+
+    </style>
+</head>
+<body>
+
+    <button class="btn">Click Me</button>
+
+</body>
+</html>

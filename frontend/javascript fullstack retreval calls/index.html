@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script src="trainees-api.js"></script>
+
+</head>
+
+<body>
+    <h2> Get All Trainees </h2>
+    <button onclick="getTrainee()">Get Trainees</button>
+
+    <h2> Get Trainee By Id </h2>
+    <input type="text" name="userid" id="userid">
+    <button onclick="getTraineeByuserId()">Get Trainee By Id</button>
+
+    <h2> Get Trainee By Name </h2>
+    <input type="text" name="username" id="username">
+    <button onclick="getTraineeByuserName()">Get Trainee By Name</button>
+
+
+
+    <h2> Add trainee </h2>
+    <input type="text" name="newid" id="newid" placeholder="Enter your id here">
+    <input type="text" name="newusername" id="newusername" placeholder="Enter your name here">
+    <input type="text" name="newlocation" id="newlocation" placeholder="Enter your location here">
+    <input type="text" name="newdate" id="newdate" placeholder="Enter your joined date here">
+    <button onclick="addTrainee()"> Add Details</button>
+
+
+
+    <h2> Delete Trainee </h2>
+    <input type="text" name="deleteid" id="deleteid">
+    <button onclick="deleteTraineebyID()"> Delete Trainee </button>
+    
+
+
+    <h2> Update Trainee </h2>
+    <input type = "text" name = "updateid" id = "updateid">
+    <input type="text" name="updatename" id="updatename" placeholder="Enter your name here">
+    <input type="text" name="updatelocation" id="updatelocation" placeholder="Enter your location here">
+    <input type="text" name="updatedate" id="updatedate" placeholder="Enter your joined date here">
+    <button onclick="updateTrainee()"> Update Details</button>
+
+
+    <div id="table"></div>
+
+    <script>
+        async function getTraineeByuserId() {
+            const userid = document.getElementById('userid').value;
+            const user = await getTraineeById(userid);
+
+            let table = document.getElementById('table');
+            table.innerHTML = '';
+
+            let res = document.createElement('div');
+
+            res.innerHTML = `<p> ${user.id} </p> 
+                             <p> ${user.name} </p>
+                             <p> ${user.location} </p>
+                             <p> ${user.joinedDate} </p> `;
+
+            table.appendChild(res);
+        }
+
+        async function getTraineeByuserName() {
+            const username = document.getElementById('username').value;
+            const users = await getTraineeByName(username);
+
+            const user = users[0];
+            let table = document.getElementById('table');
+            table.innerHTML = '';
+
+            let res = document.createElement('div');
+
+            res.innerHTML = `<p> ${user.id} </p> 
+                             <p> ${user.name} </p>
+                             <p> ${user.location} </p>
+                             <p> ${user.joinedDate} </p> `;
+
+            table.appendChild(res);
+
+        }
+
+
+        async function deleteTraineebyID() {
+            const id = document.getElementById('deleteid').value;
+            const data = await deleteTraineeById(id);
+
+            let table = document.getElementById('table');
+            table.innerHTML = '';
+
+            let res = document.createElement('div');
+
+            res.innerHTML = `<p> ${data.id} </p> 
+                             <p> ${data.name} </p>
+                             <p> ${data.location} </p>
+                             <p> ${data.joinedDate} </p>`;
+
+            table.appendChild(res);
+            console.log("getting into deleted");
+
+        }
+
+        
+        //getTrainee();
+
+
+    </script>
+
+
+</body>
+
+</html>
