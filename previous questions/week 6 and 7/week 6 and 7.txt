@@ -1,0 +1,549 @@
+Digit Limit:
+
+import java.io.*;
+import java.util.*;
+
+public class Solution {
+
+     public static long digitLimit(long N, long W) {
+        long totalCost = 0;
+        long length=0;
+        List<Long> arr = new ArrayList<>();
+        arr.add(9l);
+        arr.add(100l - 10l);
+        arr.add(1000l - 100l);
+        arr.add(10000l - 1000l);
+        arr.add(100000l - 10000l);
+        arr.add(1000000l - 100000l);
+        arr.add(10000000l - 1000000l);
+        arr.add(100000000l - 10000000l);
+        arr.add(1000000000l - 100000000l);
+        arr.add(9000000000l);
+        arr.add(90000000000l);
+
+        int index = (int)Math.log10(N) + 1;
+        if (index == 1) {
+            long ans = (10 - N) * 1;
+            if (ans >= W) {
+                return W;
+            } else {
+                totalCost += ans;
+                length+=(10-N);
+            }
+        } else if (index == 2) {
+            long ans = (100 - N) * 2;
+            if (ans >= W) {
+                return W / 2;
+            } else {
+                totalCost += ans;
+                length+=(100-N);
+            }
+        } else if (index == 3) {
+            long ans = (1000 - N) * 3;
+            if (ans >= W) {
+                return W / 3;
+            } else {
+                totalCost += ans;
+                length+=(1000-N);
+            }
+        } else if (index == 4) {
+            long ans = (10000 - N) * 4;
+            if (ans >= W) {
+                return W / 4;
+            } else {
+                totalCost += ans;
+                length+=(10000-N);
+            }
+        } else if (index == 5) {
+            long ans = (100000 - N) * 5;
+            if (ans >= W) {
+                return W / 5;
+            } else {
+                totalCost += ans;
+                length+=(100000-N);
+            }
+        } else if (index == 6) {
+            long ans = (1000000l - N) * 6;
+            if (ans >= W) {
+                return W / 6;
+            } else {
+                totalCost += ans;
+                length+=(1000000l-N);
+            }
+        } else if (index == 7) {
+            long ans = (10000000l - N) * 7;
+            if (ans >= W) {
+                return W / 7;
+            } else {
+                totalCost += ans;
+                length+=(10000000l-N);
+            }
+        } else if (index == 8) {
+            long ans = (100000000l - N) * 8;
+            if (ans >= W) {
+                return W / 8;
+            } else {
+                totalCost += ans;
+                length+=(100000000l-N);
+            }
+        } else if (index == 9) {
+            long ans = (1000000000l - N) * 9;
+            if (ans >= W) {
+                return W / 9;
+            } else {
+                totalCost += ans;
+                length+=(1000000000l-N);
+            }
+        }else if(index==10){
+            long ans = (10000000000l-N)*10;
+            if (ans >= W) {
+                return W / 10;
+            } else {
+                totalCost += ans;
+                length+=(10000000000l-N);
+            }
+        }
+
+        
+        while (index < 10) {
+
+            long ans=ans=arr.get(index);
+            long san = ans * (index+1); 
+            if (totalCost + san >= W) {
+                long res = (W - totalCost) / (index+1);  
+                return length + res;  
+            } else {
+                index++;
+                totalCost += san;
+                length+=ans;
+
+            }
+        }
+
+        return length;  
+    }
+
+    
+	public static void main(String[] args) {
+        Scanner scan = new Scanner(System.in);
+    
+        long N = Long.parseLong(scan.nextLine().trim());
+        long W = Long.parseLong(scan.nextLine().trim());
+    
+        long result = digitLimit(N, W);
+        System.out.println(result);
+	}
+}
+
+
+Farthest Pairs:
+
+import java.io.*;
+import java.util.*;
+import java.lang.Math;
+
+
+public class Solution {
+    public static int farthestPairs(int N, List<Integer> A) {
+        // Write your code here
+        int []mini=new int[N];
+        mini[0]=A.get(0);
+        for(int i=1;i<N;i++){
+            mini[i]=Math.min(mini[i-1],A.get(i));
+        }
+        int []maxi=new int[N];
+        maxi[N-1]=A.get(N-1);
+        for(int i=N-2;i>=0;i--){
+            maxi[i]=Math.max(maxi[i+1],A.get(i));
+        }
+        int i=0,j=0,maxdist=-1;
+        while(i<N && j<N){
+            if(mini[i]<maxi[j]){
+                maxdist=Math.max(maxdist,j-i);
+                j++;
+            }else{
+                i++;
+            }
+        }
+        return maxdist;
+    
+    }
+
+    public static void main(String[] args) {
+        Scanner scan = new Scanner(System.in);
+    
+        int N = Integer.parseInt(scan.nextLine().trim());
+        
+        List<Integer> A = new ArrayList<>(N);
+        for(int j=0; j<N; j++) {
+            A.add(Integer.parseInt(scan.nextLine().trim()));
+        }
+    
+        int result = farthestPairs(N, A);
+    
+        System.out.println(result);
+    }
+}
+
+
+
+
+XOR TREE:
+
+import java.io.*;
+import java.util.*;
+import java.lang.Math;
+
+
+public class Solution {
+    public static int computexor(List<Integer> arr,int[] lazy,int node){
+        if(node>=arr.size()){
+            return 0;
+        }
+        arr.set(node,arr.get(node)+lazy[node]);
+        if(2*node+1<arr.size()) lazy[2*node+1]+=lazy[node];
+        if(2*node+2<arr.size()) lazy[2*node+2]+=lazy[node];
+
+        lazy[node]=0;
+        int leftxor=computexor(arr,lazy,2*node+1);
+        int rightxor=computexor(arr,lazy,2*node+2);
+        return arr.get(node)^leftxor^rightxor;
+    }
+    public static int getXorValue(int N, List<Integer> Arr, int M, List<Integer> X, List<Integer> V) {
+        // Write your code here
+        int[] lazy=new int[N];
+        for(int i=0;i<M;i++){
+            int node=X.get(i);
+            int increment=V.get(i);
+            lazy[node]+=increment;
+        }
+        int resultXor=computexor(Arr,lazy,0);
+        return resultXor;
+    
+    }
+
+    public static void main(String[] args) {
+        Scanner scan = new Scanner(System.in);
+    
+        int N = Integer.parseInt(scan.nextLine().trim());
+        
+        List<Integer> Arr = new ArrayList<>(N);
+        for(int j=0; j<N; j++) {
+            Arr.add(Integer.parseInt(scan.nextLine().trim()));
+        }
+        
+        int M = Integer.parseInt(scan.nextLine().trim());
+        
+        List<Integer> X = new ArrayList<>(M);
+        for(int j=0; j<M; j++) {
+            X.add(Integer.parseInt(scan.nextLine().trim()));
+        }
+        
+        List<Integer> V = new ArrayList<>(M);
+        for(int j=0; j<M; j++) {
+            V.add(Integer.parseInt(scan.nextLine().trim()));
+        }
+    
+        int result = getXorValue(N, Arr, M, X, V);
+    
+        System.out.println(result);
+    }
+}
+
+
+
+
+
+SMART SANTA:
+
+import java.io.*;
+import java.util.*;
+import java.lang.Math;
+public class Solution {
+    public static int smart_santa(int N,int[] A,int[] B){
+        Arrays.sort(A);
+        Arrays.sort(B);
+        int i=0,j=0;
+        int count=0;
+        while(i<N && j<N){
+            if(A[i]<=B[j]){
+                i++;
+                j++;
+                count++;
+            }else{
+                j++;
+            }
+        }
+        return N-count;
+    }
+
+    public static void main(String[] args){
+        Scanner scan = new Scanner(System.in);
+        int N;
+        N=scan.nextInt();
+        int[] A = new int[N];
+        for(int j=0;j<N;j++){
+            A[j]=scan.nextInt();
+        }
+        int[] B = new int[N];
+        for(int j=0;j<N;j++){
+            B[j]=scan.nextInt();
+        }
+        int result;
+        result = smart_santa(N,A,B);
+        System.out.print(result);
+        return ;
+    }
+}
+
+
+
+
+
+Is Sum Greater Than XOR:
+
+import java.io.*;
+import java.util.*;
+import java.lang.Math;
+public class Solution {
+    public static int sumGreaterXor(int[] A){
+        long ans = 0;
+        long MOD = 1000000007;
+        long[] setBits = new long[32];
+        long[] twoPowers = new long[32];
+
+        twoPowers[0] = 1;
+        for (int i = 1; i < 32; i++) {
+            twoPowers[i] = (2 * twoPowers[i - 1]) % MOD;
+        }
+
+        for (int i : A) {
+            int temp = i;
+            for (int j = 0; j < 32; j++) {
+                if (temp % 2 == 1) {
+                    setBits[j]++;
+                }
+                temp = temp / 2;
+            }
+        }
+
+        for (int i = 0; i < 32; i++) {
+            long ones = setBits[i];
+            long ones2 = ((ones * (ones - 1)) / 2) % MOD;
+
+            if (ones >= 2) {
+                ans = (ans + 4 * (twoPowers[i] * ones2)) % MOD;
+            }
+        }
+        for (int i : A) {
+            ans = (ans + 2 * i) % MOD;
+        }
+        return (int) (ans % MOD);
+    }
+
+    public static void main(String[] args){
+        Scanner scan = new Scanner(System.in);
+        int N;
+        N=scan.nextInt();
+        int[] A = new int[N];
+        for(int j=0;j<N;j++){
+            A[j]=scan.nextInt();
+        }
+        int result;
+        result = sumGreaterXor(A);
+        System.out.print(result);
+        return ;
+    }
+}
+
+
+
+WEEk-7
+
+
+Bag Packaging:
+
+import java.io.*;
+import java.util.*;
+import java.lang.Math;
+public class Solution {
+    static int Kballs;
+    public static int bagPacking(int[] balls){
+        PriorityQueue<Integer>pq=new PriorityQueue<>();
+        PriorityQueue<Integer>remainbag=new PriorityQueue<>();
+        int ans=0;
+        int[] remainbags=new int[balls.length];
+        for(int i=0;i<balls.length;i++){
+            int res=(balls[i]/10);
+            if(res>=10){
+                ans+=10;
+                remainbags[i]=0;
+            }else{
+                ans+=res;
+                if(balls[i]%10!=0){
+                pq.add(10-(balls[i]%10));
+                remainbags[i]=10-res-1;
+                remainbag.add(10-res-1);
+                }else{
+                    remainbags[i]=10-res;
+                    remainbag.add(10-res);
+                }
+            }
+        }
+        while(!pq.isEmpty() && Kballs>0){
+            int res=pq.poll();
+            if(Kballs>=res){
+                ans++;
+                Kballs-=res;
+            }
+        }
+        while(!remainbag.isEmpty() && Kballs>0){
+            int res=remainbag.poll();
+            while(res>0 && Kballs>0){
+                if(Kballs>=10){
+                    ans++;
+                    Kballs-=10;
+                    res--;
+                }else{
+                    break;
+                }
+            }
+        }
+
+        return ans;
+    }
+
+    public static void main(String[] args){
+        Scanner scan = new Scanner(System.in);
+        int N;
+        N=scan.nextInt();
+        int K;
+        K=scan.nextInt();
+        Kballs=K;
+        int[] balls = new int[N];
+        for(int j=0;j<N;j++){
+            balls[j]=scan.nextInt();
+        }
+        int result;
+        result = bagPacking(balls);
+        System.out.print(result);
+        return ;
+    }
+}
+
+
+
+
+
+FIND THE VALUE:
+
+import java.io.*;
+import java.util.*;
+import java.lang.Math;
+
+
+public class Solution {
+    static int mod=1000000007;
+    static int gcd(int a, int b){
+        if(a==0){
+            return b;
+        }
+        return gcd(b%a,a);
+    }
+    public static int calculateCount(int N, List<Integer> Arr) {
+        // Write your code here
+        int g=Arr.get(0);
+        long ans=1;
+        HashSet<Integer>divisors=new HashSet<Integer>();
+        for(int i=1;i<N;i++){
+            g=gcd(Arr.get(i),g);
+        }
+        for(int i=1;i*i<=g;i++){
+            if(g%i==0){
+                ans=(ans*i)%mod;
+                if(g/i!=i){
+                    ans=(ans*(g/i))%mod;
+                }
+            }
+        }
+        return (int)(ans%mod);
+    
+    }
+
+    public static void main(String[] args) {
+        Scanner scan = new Scanner(System.in);
+    
+        int N = Integer.parseInt(scan.nextLine().trim());
+        
+        List<Integer> Arr = new ArrayList<>(N);
+        for(int j=0; j<N; j++) {
+            Arr.add(Integer.parseInt(scan.nextLine().trim()));
+        }
+    
+        int result = calculateCount(N, Arr);
+    
+        System.out.println(result);
+    }
+}
+
+
+
+
+
+PRIME PROBLEM:
+
+import java.io.*;
+import java.util.*;
+import java.lang.Math;
+public class Solution {
+    public static int querReports(int N,int[] AR,int Q,int[] L,int[] R){
+        int n=100000;
+        boolean[] isprime=new boolean[n+1];
+        Arrays.fill(isprime,true);
+        isprime[0]=isprime[1]=false;
+        for(int p=2;p*p<=n;p++){
+            if(isprime[p]){
+                for(int i=p*p;i<=n;i+=p){
+                    isprime[i]=false;
+                }
+            }
+        }
+        long ans=0;
+        for(int i=0;i<Q;i++){
+            int count=0;
+            for(int j=L[i];j<=R[i];j++){
+                if(isprime[AR[j-1]]){
+                    count++;
+                }
+            }
+            // System.out.println(count);
+            ans+=count;
+        }
+        return (int)ans;
+    }
+
+    public static void main(String[] args){
+        Scanner scan = new Scanner(System.in);
+        int N;
+        N=scan.nextInt();
+        int[] AR = new int[N];
+        for(int j=0;j<N;j++){
+            AR[j]=scan.nextInt();
+        }
+        int Q;
+        Q=scan.nextInt();
+        int[] L = new int[Q];
+        for(int j=0;j<Q;j++){
+            L[j]=scan.nextInt();
+        }
+        int[] R = new int[Q];
+        for(int j=0;j<Q;j++){
+            R[j]=scan.nextInt();
+        }
+        int result;
+        result = querReports(N,AR,Q,L,R);
+        System.out.print(result);
+        return ;
+    }
+}
+

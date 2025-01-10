@@ -1,0 +1,1152 @@
+1. Writing a transaction service in Java
+
+Previous
+
+Next
+Problem statement:
+
+
+
+You need to write a Java program that reads a CSV file containing a list of bank transactions and performs the following operations:
+
+
+
+Read the CSV file and create a list of "Transaction' objects, where each object represents a transaction in the file.
+Calculate the total balance of the account by summing up all the transaction amounts.
+Find the transaction with the highest amount.
+Find the transaction with the lowest amount.
+Find the average transaction amount.
+Handle errors gracefully by catching and handling any exceptions that may occur during file reading or transaction processing.
+
+
+Your implementation should conform to the following requirements:
+
+
+
+The program should use Exception Handling to handle any potential errors during file	reading or transaction processing.
+The program should use the "CsvToBean" class from the 'opencsv'" library to read the CSV file.
+The program should use appropriate exception handling techniques, such as try-catch blocks, to catch and handle any exceptions that may occur.
+The program should have a clean and user-friendly interface.
+
+
+Your task is to complete the methods defined in the file below:
+
+1. ../src/main/java/com/tasks/problem/TransactionService.java
+
+
+
+Notes:
+
+
+
+Ensure that the structure and datatype of the components are followed as specified in the comments to ensure that the code is evaluated correctly.
+You can add a helper method in the same service class or a helper class in the same/other package.
+You need to provide complete implementation to all the public service methods in TransactionService.java
+
+
+
+
+
+
+solution:
+package com.tasks.problem;
+
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.Reader;
+import java.util.List;
+import com.opencsv.bean.CsvToBean;
+import com.opencsv.bean.CsvToBeanBuilder;
+public class TransactionService {
+	
+	List<Transaction> transactions;
+	
+	
+	public List<Transaction> getAllTransactions() {
+		try {
+			Reader reader = new BufferedReader(new FileReader("transactions.csv"));
+			//@todo You can initialize CsvBean<T> class and then call the parse method to get the list
+
+			CsvToBean<Transaction> csvToBean = new CsvToBeanBuilder<Transaction>(reader)
+			.withType(Transaction.class)
+			.withIgnoreLeadingWhiteSpace(true)
+			.build();
+			transactions = csvToBean.parse();
+			
+            
+			// TODO Auto-generated catch block
+		}catch(IOException e){
+			System.out.println("Error reading the file:"+e.getMessage());
+		}
+		return transactions;
+	} 
+	
+
+	public Double getTotalTransactionAmount() {
+		if(transactions == null) {
+			getAllTransactions();
+		}
+		
+		// double tot = 0d;
+		// //@todo Write code to assign total transaction amount to amt variable
+		// return null;
+		return transactions.stream().mapToDouble(i->i.getAmount()).sum();
+		
+	}
+	
+	
+	public Transaction getTransactionWithHighestAmount() {
+		if(transactions == null) {
+			getAllTransactions();
+		}
+		
+		// double tot = 0d;
+		// Transaction highestTransaction = null;
+        // //@todo Write code to get the transaction object with highest amount
+
+		return transactions.stream().reduce((a,b)->{
+			if(b.getAmount() > a.getAmount()){
+				a = b;
+			}
+			return a;
+		}).get();
+		// return transactions.stream().max((a,b)->Double.compare(a.getAmount(),b.getAmount())).get();
+         
+	}
+	
+	public Transaction getTransactionWithLowestmount() {
+		if(transactions == null) {
+			getAllTransactions();
+		}
+		
+		// double tot = 0d;
+		// Transaction lowestTransaction = null;
+        // //@todo Write code to figure out transaction with lowest amount
+		// return transactions.stream().min((a,b)->Double.compare(a.getAmount(), b.getAmount())).get();
+		return transactions.stream().reduce((a,b)->{
+			if(b.getAmount() < a.getAmount()){
+				a = b;
+			}
+			return a;
+		}).get();
+		
+
+	}
+	
+	public Double getAverageTransactionAmount() {
+		if(transactions == null) {
+			transactions = getAllTransactions();
+		}
+		
+        // //@todo Write code to get the average of transaction amounts & return it.
+        // return null;
+		// return transactions.stream().mapToDouble(i->i.getAmount()).average().orElse(0);
+		double totalAmount = transactions.stream().mapToDouble(i->i.getAmount()).sum();
+		return (totalAmount/transactions.size());
+	}
+
+}
+
+
+
+
+
+------------------------------------------------------------------------------
+
+
+1. Java word analyzer using collections
+
+Previous
+
+Next
+Problem Description:
+
+
+
+Write a Java program that reads a text file containing a list of words and uses Java Collections to perform the following operations:
+
+    1. Read the text file and create a list of words, where each word is a 'String' object.
+
+    2. Create a set of all unique words in the list.
+
+    3. Create a map that associates each word with the number of times it appears in the list.
+
+    4. Find the three most common words in the list and display them along with their frequency.
+
+
+
+Your implementation should conform to the following requirements:
+
+    1. The program should use java collections to perform the various operations on the list of words.
+
+    2. The program should use the BufferedReader class to read the text file.
+
+    3. The program should handle errors gracefully (e.g., file not found, invalid data).
+
+    4. The program should have a clean and user-friendly interface.
+
+    5. The skeleton implementation already has a words.txt file populated with sample data.
+
+
+
+Your task is to complete the methods defined in the file below:
+
+
+
+ ../src/main/java/com/tasks/problem/WordAnalyzerService.java
+
+
+Notes:
+
+1. Ensure that the structure and datatype of the components are followed as specified in the comments to ensure that the code is evaluated correctly.
+
+2. Read the Java doc comments for the public methods in the WordAnalyzerService class. You need to implement your code in line with these comments
+
+
+
+
+solution:
+package com.tasks.problem;
+
+import java.io.BufferedReader;
+import java.io.FileInputStream;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.Reader;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Scanner;
+import java.util.Set;
+
+public class WordAnalyzerService {
+	String fileData;
+	
+	String[] words;
+	
+	Set<String> set = new HashSet<String>();
+	
+	Map<String, Long> map = new HashMap<String, Long>();
+	
+	/**
+	 * 
+	 * @return number of words present in the file words.txt
+	 * @throws Exception 
+	 */
+	public long readFileAndReturnNoOfWords()  {
+			//@todo Use BufferedReader to read the file and store the words into words variable
+			// delete the last new line separator
+			try{
+				InputStream input = new FileInputStream("words.txt");
+				Scanner scanner = new Scanner(input);
+				// StringBuilder stringBuilder = new StringBuilder();
+				String res="";
+
+				while(scanner.hasNextLine()){
+					String line = scanner.nextLine();
+					res+=line+" ";
+				}
+
+				words = res.split(" ");
+				return words.length;
+
+			}catch(IOException e){
+				System.err.println("Error reading the file: " + e.getMessage());
+				return 0;
+			}
+	}
+	
+	/*
+	 * 
+	 * @return the unique words present in the file. These words should be populated in the set variable declared above.
+	 */
+	public long createSetOfUniqueWordsAndReturnUniqueCount() {
+			if(words == null) {
+				readFileAndReturnNoOfWords();
+			}
+			for(String str : words){
+				set.add(str);
+			}
+
+
+		//@todo  Add words to the collection uniquely
+		return set.size();
+		 
+	}
+	
+	/**
+	 * Populate the map variable with key-value mapping of word-count, count representing how many times the word appeared in the file.
+	 */
+	public void createMapOfWord_Count() {
+		if(words == null) {
+			readFileAndReturnNoOfWords();
+		}
+		//@todo Populate the map variable by writing appropriate code
+
+		for(String str: words){
+			if(map.containsKey(str)){
+				map.put(str,map.get(str)+1);
+			}
+			map.put(str, (long) 1);
+		}
+		 
+		}
+
+	/**
+	 * 
+	 * @param word - input word 
+	 * @return the number of times the input word appeared in the file
+	 */
+	public long getOccurrencesOf(String word) {
+		if(map.keySet().size() == 0) {
+			createMapOfWord_Count();
+		}
+		//@todo Get the count
+		long count = 0l;
+		for(String str: words){
+			if(str.equals(word)){
+				count++;
+			}
+		}
+		return count;
+	}
+	
+	/**
+	 * 
+	 * @return topp 3 words sorted (desc) by number of occurrences in the file
+	 */
+	public List<String> findThreeMostCommonWords(){
+		// List<String> list = new ArrayList<>();
+		// map.entrySet().stream().sorted((a,b)->b.getValue().compareTo(a.getValue()));
+		// int count = 0;
+		// for(String str : map.keySet()){
+		// 	if(count==3)break;
+		// 	list.add(str);
+		// 	count++;
+		// }
+		// return list;
+
+		List<String> list = new ArrayList<>();
+		map.entrySet().stream()
+			.sorted((a, b) -> b.getValue().compareTo(a.getValue())) 
+			.limit(3) 
+			.forEach(entry -> list.add(entry.getKey())); 
+
+		return list;
+	}
+		
+	
+	/**
+	 * Sort the map keys based on key value with most commonly used word at the top.
+	 * @param hm
+	 * @return
+	 */
+	private static Map<String, Long>
+    sortByValue(Map<String, Long> hm)
+    {
+		//@todo Sort the map on the basis of value of the key in the Map.
+        
+		// Creating a list from elements of HashMap
+ 
+        // Sorting the list using Collections.sort() method
+        // using Comparator
+ 
+        // putting the  data from sorted list back to hashmap
+ 
+        // returning the sorted HashMap
+		
+		return null;
+    }
+
+}
+
+
+
+-----------------------------------------------------------------------------
+
+
+1. Working with substrings in Java
+
+Previous
+
+Next
+Task Description:
+
+You are given a string str, find the length of the longest substring in str without repeating characters. Implement an efficient solution with a time complexity of O(n).
+
+
+
+Example:
+
+Let the given string be “ABDEFGABEF”, the longest substrings without repeating characters here are “BDEFGA” and “DEFGAB”, with length 6. Similarly, for “BBBB” the longest substring is “B”, with length 1.
+
+
+
+Your task is to complete the helper methods defined in the file below:
+
+
+
+../src/main/java/com/tasks/problem/LongestSubstring.java
+
+
+Notes:
+
+
+
+Ensure that the structure and datatype of the components are followed as specified in the comments to ensure that the code is evaluated correctly.
+Use Test App & Submit option often so you will be guided by test error messages.
+When you delete or edit something you shouldn’t have, test messages will give an error accordingly
+You will receive a congratulations message upon successful completion of the task.
+
+
+solution:
+package com.tasks.problem;
+
+public class LongestSubstring {
+	
+	public static int lengthOfLongestSubstring(String str) {
+		String test = "";
+		 
+        // Result
+        int maxLength = -1;
+ 
+        // Return zero if string is empty
+        if (str.isEmpty()) {
+            return 0;
+        }
+        // Return one if string length is one
+        else if (str.length() == 1) {
+            return 1;
+        }
+        for (char c : str.toCharArray()) {
+            String current = String.valueOf(c);
+ 
+            // If string already contains the character
+            // Then substring after repeating character
+
+            if(test.contains(current)){
+                test = test.substring(test.indexOf(current)+1);
+            }
+
+            test = test + current;
+
+            //@todo
+            // test = test + String.valueOf(c);
+            //@todo Evaluate the value for maxLength
+            maxLength = Math.max(maxLength, test.length());
+        }
+        //@todo return maxLength
+        return maxLength;
+    }
+
+    
+
+}
+
+
+
+
+---------------------------------------------------------------------------
+
+1. Writing a product service in Java
+
+Previous
+
+Next
+Problem Description:
+
+
+
+Write a Java program that reads a CV file containing a list of bank transactions and performs the following operations:
+
+
+
+    1. Read the CSV file and create a list of "Product' objects, where each object represents a product in the file.
+
+    2. Filter the list of products to include only those with a price greater than a specified value.
+
+    3. Group the products by category and calculate the total value of products in each category.
+
+    4. Calculate the average price of all products in the list.
+
+    5. Find the product with the highest price in the list.
+
+    6. The public methods service class ProductService.java has method skeletons, that you need to update to fulfill above expectations
+
+
+
+Your implementation should conform to the following requirements:
+
+
+
+   1. The program should use Exception Handling to handle any potential errors during file reading or transaction processing.
+
+    2. The program should use the "CsvToBean" class from the 'opencsv'" library to read the CSV file.
+
+    3. The program should use appropriate exception handling techniques, such as try-catch blocks, to catch and handle any exceptions that may occur.
+
+    4. The program should have a clean and user-friendly interface.
+
+
+
+Your task is to complete the methods defined in the file below:
+
+    1. ../src/main/java/com/tasks/problem/ProductService.java
+
+
+
+Notes:
+
+    1. Ensure that the structure and datatype of the components are followed as specified in the comments to ensure that the code is evaluated correctly.
+
+    2. You can add a helper method in the same service class or a helper class in the same/other package.
+
+
+
+
+
+solution:
+
+package com.tasks.problem;
+
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.Reader;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import com.opencsv.bean.CsvToBean;
+import com.opencsv.bean.CsvToBeanBuilder;
+
+public class ProductService {
+	
+	List<Product> products;
+	
+	
+	public List<Product> getAllProducts() {
+		try {
+			//@todo write code using OpenCSV to read the file products.csv and marshalling it to list of products.
+			Reader reader = new BufferedReader(new FileReader("products.csv"));
+			CsvToBean<Product> csvToBean = new CsvToBeanBuilder<Product>(reader)
+			.withType(Product.class)
+			.withIgnoreLeadingWhiteSpace(true)
+			.build();
+			products = csvToBean.parse();
+			
+            
+			// TODO Auto-generated catch block
+		
+		} catch(IOException e){
+			System.out.println("Error reading the file:"+e.getMessage());
+		}
+		return products;
+	}
+	
+	public List<Product> getProductsWithPriceGreaterThan(Double price){
+		if(this.products == null) {
+			getAllProducts();
+		}
+		//@todo Write code to filter products having price greater than the passed price agrument
+	 
+		return products.stream().filter(i->i.getPrice()>price).collect(Collectors.toList());
+	}
+	
+	public Double groupByCategoryAndAggregateValue(String category){
+		if(this.products == null) {
+			getAllProducts();
+		}
+		//@todo Write code to group by category argument apssed as method parameter and then retutn the aggregated price of products belonging to the category.
+		 
+		// double tot = 0d;
+		
+		// return null;
+		return products.stream().filter(i->i.getCategory().equals(category)).mapToDouble(i->i.getPrice()).sum();
+	}
+	
+	public Double calculateAverageOfAllProducts(){
+		if(this.products == null) {
+			getAllProducts();
+		}
+		// //@todo Write code to evaluate the average of prices of all products
+		
+		// double tot = 0d;
+		
+		// return null;
+		return products.stream().mapToDouble(i->i.getPrice()).average().orElse(0);
+	}
+	
+	public Product findProductWithHighestPrice(){
+		if(this.products == null) {
+			getAllProducts();
+		}
+		// //@todo Write code to fetch the product with highest price
+		 
+		// double tot = 0d;
+		// return null;
+
+		return products.stream().reduce((a,b)->{
+			if(b.getPrice() > a.getPrice()){
+				a = b;
+			}
+			return a;
+		}).get();
+	}
+
+}
+
+
+-----------------------------------------------------------------
+
+1. Java LRU Cache
+
+Previous
+
+Next
+Implement a thread safe Least Recently Used (LRU) cache that supports the following operations:
+
+
+
+get(key)
+put(key, value)
+    
+
+The cache should have a specified capacity, and when the number of unique keys exceeds the capacity, the least recently used key should be removed. Make the cache thread-safe using synchronization or concurrency utilities.
+
+
+
+Example
+
+Let the requests made be as follows:
+
+Put one-one
+
+Put two-two
+
+Put three-three
+
+Get one
+
+put four-four
+
+
+
+Now, if you try a get("two), you should get null since two is the least used key and hence is removed.
+
+
+
+Your task is to complete the following files
+
+
+
+../src/main/java/com/tasks/problem/LRUCache.java
+
+
+Notes:
+
+
+
+Ensure that the structure and datatype of the components are followed as specified in the comments to ensure that the code is evaluated correctly.
+Use Test App & Submit option often so you will be guided by test error messages.
+When you delete or edit something you shouldn’t have, test messages will give an error accordingly
+You will receive a congratulations message upon successful completion of the task.
+
+
+solution:
+
+package com.tasks.problem;
+
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
+
+public class LRUCache<K,V> {
+
+    private  ConcurrentLinkedQueue<K> concurrentLinkedQueue = new ConcurrentLinkedQueue<K>();
+
+    private  ConcurrentHashMap<K,V> concurrentHashMap = new ConcurrentHashMap<K, V>();
+
+    private ReadWriteLock readWriteLock = new ReentrantReadWriteLock();
+
+    
+
+    int maxSize=0;
+
+    public LRUCache(final int MAX_SIZE){
+        this.maxSize=MAX_SIZE;
+    }
+
+    public V get(K key){
+
+       
+        readWriteLock.readLock().lock();
+        try {
+        V v=null;
+        if (concurrentHashMap.containsKey(key)) {
+            // Remove the key from the queue and re-add it to the end to mark it as recently used
+            concurrentLinkedQueue.remove(key);
+            concurrentLinkedQueue.add(key);
+            v = concurrentHashMap.get(key);
+        }
+        return v;
+        }finally{
+        	readWriteLock.readLock().unlock();
+        }
+    }
+    
+    public int size() {
+    	readWriteLock.readLock().lock();
+    	
+    	try {
+    		return concurrentHashMap.size();
+    	}
+    	finally{
+        	readWriteLock.readLock().unlock();
+        }
+    }
+
+
+
+    public void put(K key,V value){
+       
+    	readWriteLock.writeLock().lock();
+        try {
+            if (concurrentHashMap.containsKey(key)) {
+                concurrentHashMap.put(key, value);
+                concurrentLinkedQueue.remove(key);
+            } else {
+                if (concurrentHashMap.size() >= maxSize) {
+                    K oldestKey = concurrentLinkedQueue.poll();
+                    if (oldestKey != null) {
+                        concurrentHashMap.remove(oldestKey);
+                    }
+                }
+                concurrentHashMap.put(key, value);
+            }
+            concurrentLinkedQueue.add(key);
+
+
+        
+        } finally{
+        	readWriteLock.writeLock().unlock();
+        }
+    }
+}
+
+----------------------------------------------------------------------------
+
+
+
+Project description:
+
+The government is building a centralized library management system which involves a micro-service, allowing people to issue books and return them at the right time.
+
+Library management requires creating users and renewing user subscriptions via authenticated processes. Secure create-user and renew-user-subscription APIs with Spring Security. The API issue-book should be permitted for everyone. This micro-service should be built using the Spring Boot REST API framework and it should connect to the database using the JPA API and secure methods using Spring Security.
+
+
+
+In this task, implement 3 APIs for which the details are given below:
+
+1. /api/v1/create-user [POST]: Simple user save method in an authenticated manner
+2. /api/v1/issue-book [POST]: Send issue, check if users subscribed(see subscribed field in User entity), otherwise throw SubscriptionExpiredException- permitAll
+3. /api/v1/renew-user-subscription/{id} [GET]: Send userId, set user subscription to true in an authenticated manner.
+
+
+Your task is to complete the files given below:
+1. src/main/java/com/wecp/library/controller/LibraryController.java
+2. src/main/java/com/wecp/library/security/WebSecurityConfigurer.java
+3. src/main/java/com/wecp/library/repository/UserRepository.java
+4. src/main/java/com/wecp/library/repository/IssueRepository.java
+
+
+You can find blank jpa repositories here:
+
+1. src/main/java/com/wecp/library/repository/UserRepository.java
+2. src/main/java/com/wecp/library/repository/IssueRepository.java
+
+
+Notes:
+
+1. Implementation related specifics are added directly as javadocs in the workspace.
+2. Ensure that the structure and datatypes of the APIs are followed as specified in the comments to ensure that the code is evaluated correctly.
+
+Testing & Submitting your code:
+
+Step 1: Click on the WeCP Projects Button. 
+Step 2: Write your code to complete the tasks and click on the Test and Submit App to execute your code and confirm if the application is working as expected. 
+Step 3: Click on the Test and Submit App button to execute your code. You will be given a congratulations message if your code is working perfectly.
+Step 4: You will be given a string url on clicking on Show testing url button. Append your api endpoints to the end of this string url to test your API endpoints on thunderclient. 
+Step 5: Use the Run App button to start the application before performing api testing.
+
+
+
+
+
+@Entity
+public class Book implements Serializable {
+    private static final long serialVersionUID = 1L;
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    private Long id;
+
+    private String name;
+
+
+
+@Entity
+public class Issue implements Serializable {
+    private static final long serialVersionUID = 1L;
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    private Long id;
+
+    private LocalDate issueDate;
+
+    private LocalDate returnDate;
+
+    private Integer period;
+
+    private Integer fine;
+
+    @ManyToOne
+    @JsonIgnoreProperties(value = "issues", allowSetters = true)
+    private Book book;
+
+    @ManyToOne
+    @JsonIgnoreProperties(value = "issues", allowSetters = true)
+    private User user;
+
+
+
+
+@Entity
+public class User implements Serializable {
+    private static final long serialVersionUID = 1L;
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    private Long id;
+
+    private String username;
+
+    private boolean subscribed = false;
+
+
+
+package com.wecp.library.controller;
+
+import com.wecp.library.controller.exception.UserNotSubscribedException;
+import com.wecp.library.domain.Issue;
+import com.wecp.library.domain.User;
+import com.wecp.library.repository.IssueRepository;
+import com.wecp.library.repository.UserRepository;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.Optional;
+
+/**
+ * REST controller for managing library system process
+ */
+@RestController
+@RequestMapping("/api/v1")
+public class LibraryController {
+
+    @Autowired
+    private UserRepository userRepository;
+
+    @Autowired
+    private IssueRepository issueRepository;
+
+    /**
+     * {@code POST  /issueBook} : Create a new issue.
+     *
+     * @param issue the issue to create.
+     * @return the {@link ResponseEntity} with status {@code 200 (OK)} and with body
+     * the user, or if does not exist, return with status "noContent".
+     * If user is not subscribed, throw {@link UserNotSubscribedException}
+     */
+    @PostMapping("/issue-book")
+    public ResponseEntity<Issue> issueBook(@RequestBody Issue issue) {
+        Optional<User> userOptional = userRepository.findById(issue.getUser().getId());
+
+        if (userOptional.isPresent()) {
+            User user = userOptional.get();
+
+            // Check if user is subscribed, if not, throw an exception
+            if (!user.getSubscribed()) { // Check if the user is NOT subscribed
+                throw new UserNotSubscribedException(); // Exception is thrown if user is not subscribed
+            }
+
+            // Issue the book and save it
+            Issue savedIssue = issueRepository.save(issue);
+            return ResponseEntity.ok().body(savedIssue);
+        }
+
+        return ResponseEntity.noContent().build(); // If user does not exist, return noContent response
+    }
+
+    /**
+     * {@code POST  /user} : Create a new user.
+     *
+     * @param user the user to create.
+     * @return the {@link ResponseEntity} with status {@code 200 (OK)} and with body the new user
+     */
+    @PostMapping("/user")
+    public ResponseEntity<User> createUser(@RequestBody User user) {
+        return ResponseEntity.ok().body(userRepository.save(user));
+    }
+
+    /**
+     * {@code GET  /renew-user-subscription/:id} :  Send userId, set user subscription to true
+     *
+     * @param id the id of the user to renew subscription.
+     * @return the {@link ResponseEntity} with status {@code 200 (OK)} and with body
+     * the user, or if does not exist, return with status "noContent".
+     */
+    @GetMapping("renew-user-subscription/{id}")
+    public ResponseEntity<User> renewUserSubscription(@PathVariable Long id) {
+        Optional<User> userOptional = userRepository.findById(id);
+
+        if (userOptional.isPresent()) {
+            User user = userOptional.get();
+            user.setSubscribed(true); // Renew subscription
+            return ResponseEntity.ok().body(userRepository.save(user));
+        }
+
+        return ResponseEntity.noContent().build(); // If user does not exist, return noContent response
+    }
+}
+
+
+
+
+
+
+
+package com.wecp.library.security;
+
+import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+
+/**
+ * Configure Spring Security class here. Don't forget to extend the class with the necessary Spring Security class.
+ * user and renew-user-subscription APIs must be authenticated and issue-book must be permitAll.
+ */
+@Configuration
+@EnableWebSecurity
+public class WebSecurityConfigurer extends WebSecurityConfigurerAdapter{
+
+    @Override
+    protected void configure(HttpSecurity http) throws Exception {
+        http.csrf().disable().authorizeRequests()
+                .antMatchers("/api/v1/issue-book").permitAll()
+                .antMatchers("/api/v1/create-user","/api/v1/renew-user-subscription/**").authenticated()
+                .anyRequest().authenticated()
+                .and()
+                .httpBasic();
+    }
+
+}
+
+
+
+--------------------------------------------------------------------------------------------------------------
+
+
+
+Project Description:
+The government is building a centralized library management system which involves a micro-service, allowing people to issue books and return them at the right time.
+
+In this task, you need to conform to the following requirements:
+1. Build "depositBook" API in a reactive way(should return Mono).
+2. Users can issue a book and deposit them. If they issue the book after the given period, fine should apply.
+3. You can find the fields and do the math(issueDate, period, returnDate).
+4. This micro-service should be built using the Spring Boot REST API framework and connect to the database using the JPA API.
+5. The "depositBook" API should be built using the Spring Boot WebFlux.
+
+The application exposes 2 more APIs. The details of the APIs are given below:
+1. /api/v1/issueBook [POST]: Users issue a book of their choice, if book quantity is zero, it should throw "BookNotAvailableException"
+2. /api/v1/depositBook [POST]: Send issue, return fine if there is one or return 0 (this one should be reactive)
+
+
+Your task is to complete the files:
+1. src/main/java/com/wecp/library/controller/LibraryController.java
+2. src/main/java/com/wecp/library/repository/BookRepository.java
+3. src/main/java/com/wecp/library/repository/IssueRepository.java
+
+You can find blank jpa repositories here:
+1. src/main/java/com/wecp/library/repository/BookRepository.java
+2. src/main/java/com/wecp/library/repository/IssueRepository.java
+
+Notes:
+1. Implementation related specifics are added directly as javadocs in the workspace.
+2. Ensure that the structure and datatypes of the APIs are followed as specified in the comments to ensure that the code is evaluated correctly.
+
+Testing & Submitting your code:
+
+Step 1: Click on the WeCP Projects Button. 
+Step 2: Write your code to complete the task(s) according to the question. Click on the Submit & Test App button to execute your code and confirm if the application is working as expected. 
+Step 3: Click on the Submit & Test App button to execute your code. You will be given a congratulations message if your code is working perfectly.
+
+
+
+
+@Entity
+public class Book implements Serializable {
+    private static final long serialVersionUID = 1L;
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    private Long id;
+
+    private String name;
+
+    private Integer quantity;
+
+
+
+@Entity
+public class Issue implements Serializable {
+    private static final long serialVersionUID = 1L;
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    private Long id;
+
+    private LocalDate issueDate;
+
+    private LocalDate returnDate;
+
+    private Integer period;
+
+    private Integer fine;
+
+    @ManyToOne
+    @JsonIgnoreProperties(value = "issues", allowSetters = true)
+    private Book book;
+
+    private Long userId;
+
+
+
+
+@Entity
+public class User implements Serializable {
+    private static final long serialVersionUID = 1L;
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    private Long id;
+
+    private String username;
+
+
+
+package com.wecp.library.controller;
+
+import com.wecp.library.controller.exception.BookNotAvailableException;
+import com.wecp.library.domain.Book;
+import com.wecp.library.domain.Issue;
+import com.wecp.library.repository.BookRepository;
+import com.wecp.library.repository.IssueRepository;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+import reactor.core.publisher.Mono;
+
+import java.time.LocalDate;
+import java.util.Optional;
+
+/**
+ * REST controller for managing library system process
+ */
+@RestController
+@RequestMapping("/api/v1")
+public class LibraryController {
+
+    @Autowired
+    private BookRepository bookRepository;
+
+    @Autowired
+    private IssueRepository issueRepository;
+
+
+    /**
+     * {@code POST  /issueBook} : Create a new issue.
+     *
+     * @param issue the issue to create.
+     * @return the {@link ResponseEntity} with status {@code 200 (OK)} and with body the new issue.
+     * throw {@link BookNotAvailableException} if the wanted books quantity is zero
+     */
+    @PostMapping("/issueBook")
+    public ResponseEntity<Issue> issueBook(@RequestBody Issue issue) {
+        Optional<Book> bookOptional = bookRepository.findById(issue.getBook().getId());
+    
+    if (bookOptional.isPresent()) {
+        Book book = bookOptional.get();
+        if (book.getQuantity() <= 0) {
+            throw new BookNotAvailableException();
+        }
+        
+        issue.setBook(book);
+        Issue savedIssue = issueRepository.save(issue);
+        book.setQuantity(book.getQuantity() - 1);
+        bookRepository.save(book);
+
+        return ResponseEntity.ok().body(savedIssue);
+    } else {
+        throw new BookNotAvailableException(); 
+    }
+    }
+
+    /**
+     * {@code POST  /depositBook} : Inquiry the issue if there is a fine
+     *
+     * @param issue the issue to inquiry.
+     * @return the Mono with fine or just return 0
+     */
+    @PostMapping("/depositBook")
+    public Mono<Integer> depositBook(@RequestBody Issue issue) {
+        Optional<Issue> issueOptional = issueRepository.findById(issue.getId());
+    
+    if (issueOptional.isPresent()) {
+        Issue existingIssue = issueOptional.get();
+        LocalDate returnDate = LocalDate.now(); 
+        LocalDate time=issue.getIssueDate().plusDays(issue.getPeriod());
+        if (returnDate.isAfter(time)) {
+            long overdueDays = returnDate.toEpochDay() - time.toEpochDay();
+            int fine = existingIssue.getFine(); 
+            return Mono.just(fine);
+        }
+    }
+    return Mono.just(0);
+    }
+}
+
+
+
+
+
+
+
